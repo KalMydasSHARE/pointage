@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Pointage</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- LOGIN -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <h2>Admin</h2>
+            <p>Mot de passe administrateur</p>
+            <input type="password" id="loginPwd" placeholder="Mot de passe"
+                   onkeypress="if(event.key==='Enter') doLogin()">
+            <div class="login-error" id="loginErr"></div>
+            <button class="btn btn-primary" style="width:100%;padding:14px;" onclick="doLogin()">Connexion</button>
+        </div>
+    </div>
+
+    <!-- ADMIN PAGE -->
+    <div class="page-wrapper" id="adminPage" style="display:none;">
+        <div class="top-bar">
+            <h1>Administration</h1>
+            <div class="top-bar-right">
+                <span id="syncIndicator" class="sync-indicator hidden"></span>
+                <a href="index.html">Pointage</a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Print header -->
+            <div class="print-header">
+                <h2>Rapport de pointage</h2>
+                <p id="printPeriod"></p>
+            </div>
+
+            <!-- TABS -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="today" onclick="switchTab('today')">Aujourd'hui</button>
+                <button class="tab-btn" data-tab="month" onclick="switchTab('month')">Mensuel</button>
+                <button class="tab-btn" data-tab="employees" onclick="switchTab('employees')">Employés</button>
+                <button class="tab-btn" data-tab="backup" onclick="switchTab('backup')">Sauvegarde</button>
+            </div>
+
+            <!-- TAB: AUJOURD'HUI -->
+            <div id="tab-today" class="tab-panel active">
+                <div class="controls-bar">
+                    <input type="date" id="dayFilter" class="input-field">
+                    <button class="btn btn-outline" onclick="loadDayData()">Actualiser</button>
+                </div>
+
+                <!-- Ajout manuel -->
+                <div class="manual-form">
+                    <h3>Ajouter un timbre manuellement</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Employé</label>
+                            <select id="manualEmp" class="input-field"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select id="manualType" class="input-field">
+                                <option value="ENTRÉE">ENTRÉE</option>
+                                <option value="SORTIE">SORTIE</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="manualDate" class="input-field">
+                        </div>
+                        <div class="form-group">
+                            <label>Heure</label>
+                            <input type="time" id="manualTime" class="input-field">
+                        </div>
+                        <div class="form-group" style="justify-content:flex-end;">
+                            <button class="btn btn-success" onclick="addManualTimbre()">Ajouter</button>
+                        </div>
+                    </div>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Heure</th>
+                            <th>Employé</th>
+                            <th>Type</th>
+                            <th class="actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dayTableBody"></tbody>
+                </table>
+            </div>
+
+            <!-- TAB: MENSUEL -->
+            <div id="tab-month" class="tab-panel">
+                <div class="controls-bar">
+                    <input type="month" id="monthFilter" class="input-field">
+                    <button class="btn btn-outline" onclick="loadMonthData()">Actualiser</button>
+                    <button class="btn btn-primary" onclick="exportCSV()">Exporter CSV</button>
+                    <button class="btn btn-outline" onclick="printMonth()">Imprimer</button>
+                </div>
+
+                <div id="monthSummary" class="summary-cards"></div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Employé</th>
+                            <th>Date</th>
+                            <th>Entrée</th>
+                            <th>Sortie</th>
+                            <th>Heures</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monthTableBody"></tbody>
+                </table>
+            </div>
+
+            <!-- TAB: EMPLOYÉS -->
+            <div id="tab-employees" class="tab-panel">
+                <div class="controls-bar">
+                    <input type="text" id="newEmpName" class="input-field"
+                           placeholder="Nom du nouvel employé"
+                           onkeypress="if(event.key==='Enter') addEmployee()">
+                    <button class="btn btn-success" onclick="addEmployee()">Ajouter</button>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th class="actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="empTableBody"></tbody>
+                </table>
+            </div>
+
+            <!-- TAB: SAUVEGARDE -->
+            <div id="tab-backup" class="tab-panel">
+                <div class="backup-section">
+                    <div class="backup-card">
+                        <h3>Exporter les données</h3>
+                        <p>Télécharge toutes les données (employés + timbrages) en fichier JSON. Garde ce fichier en sécurité.</p>
+                        <button class="btn btn-primary" onclick="exportBackup()">Télécharger la sauvegarde</button>
+                    </div>
+
+                    <div class="backup-card">
+                        <h3>Importer des données</h3>
+                        <p>Restaure les données depuis un fichier JSON de sauvegarde. Attention : ça remplace les données actuelles.</p>
+                        <input type="file" id="importFile" accept=".json" class="input-field" style="margin-bottom:10px;">
+                        <button class="btn btn-danger" onclick="importBackup()">Restaurer la sauvegarde</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // LOGIN
+        function doLogin() {
+            const pwd = document.getElementById('loginPwd').value;
+            if (pwd === ADMIN_PASSWORD) {
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('adminPage').style.display = 'flex';
+                initAdmin();
+            } else {
+                document.getElementById('loginErr').textContent = 'Mot de passe incorrect';
+            }
+        }
+
+        // TABS
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.tab === tab);
+            });
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+
+            if (tab === 'today') loadDayData();
+            if (tab === 'month') loadMonthData();
+            if (tab === 'employees') loadEmployeesTab();
+        }
+
+        // INIT
+        async function initAdmin() {
+            await GitSync.init();
+            document.getElementById('dayFilter').value = todayStr();
+            document.getElementById('monthFilter').value = currentMonthStr();
+            document.getElementById('manualDate').value = todayStr();
+            populateManualEmpSelect();
+            loadDayData();
+        }
+
+        function populateManualEmpSelect() {
+            const sel = document.getElementById('manualEmp');
+            sel.innerHTML = '';
+            Storage.getEmployees().forEach(e => {
+                const opt = document.createElement('option');
+                opt.value = e.id;
+                opt.textContent = e.name;
+                sel.appendChild(opt);
+            });
+        }
+
+        // TAB: AUJOURD'HUI
+        function loadDayData() {
+            const date = document.getElementById('dayFilter').value;
+            if (!date) return;
+
+            const timbrages = Storage.getTimbragesByDate(date);
+            const tbody = document.getElementById('dayTableBody');
+            tbody.innerHTML = '';
+
+            if (timbrages.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Aucun timbre ce jour</td></tr>';
+                return;
+            }
+
+            timbrages.forEach(t => {
+                const isEntry = t.type === 'ENTRÉE';
+                const tr = document.createElement('tr');
+                tr.innerHTML =
+                    '<td>' + t.time + '</td>' +
+                    '<td>' + t.employeeName + '</td>' +
+                    '<td><span class="dot ' + (isEntry ? 'entry' : 'exit') + '" style="display:inline-block;vertical-align:middle;margin-right:6px;"></span>' + t.type + '</td>' +
+                    '<td class="actions"><button class="btn btn-danger btn-small" onclick="deleteTimbre(\'' + t.id + '\')">Supprimer</button></td>';
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteTimbre(id) {
+            if (!confirm('Supprimer ce timbre?')) return;
+            Storage.deleteTimbre(id);
+            loadDayData();
+        }
+
+        function addManualTimbre() {
+            const empId = document.getElementById('manualEmp').value;
+            const type = document.getElementById('manualType').value;
+            const date = document.getElementById('manualDate').value;
+            const time = document.getElementById('manualTime').value;
+
+            if (!empId || !date || !time) {
+                alert('Remplis tous les champs');
+                return;
+            }
+
+            const emp = Storage.getEmployeeById(empId);
+            if (!emp) return;
+
+            Storage.addTimbre(empId, emp.name, type, date, time);
+
+            document.getElementById('manualTime').value = '';
+            document.getElementById('dayFilter').value = date;
+            loadDayData();
+        }
+
+        // TAB: MENSUEL
+        let monthCSVData = [];
+
+        function loadMonthData() {
+            const monthValue = document.getElementById('monthFilter').value;
+            if (!monthValue) return;
+
+            const timbrages = Storage.getTimbragesByMonth(monthValue);
+            const summaryDiv = document.getElementById('monthSummary');
+            const tbody = document.getElementById('monthTableBody');
+            summaryDiv.innerHTML = '';
+            tbody.innerHTML = '';
+            monthCSVData = [];
+
+            if (timbrages.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Aucun timbre ce mois</td></tr>';
+                return;
+            }
+
+            const byEmployee = {};
+            timbrages.forEach(t => {
+                if (!byEmployee[t.employeeId]) {
+                    byEmployee[t.employeeId] = { name: t.employeeName, days: {} };
+                }
+                if (!byEmployee[t.employeeId].days[t.date]) {
+                    byEmployee[t.employeeId].days[t.date] = [];
+                }
+                byEmployee[t.employeeId].days[t.date].push(t);
+            });
+
+            const sorted = Object.entries(byEmployee).sort((a, b) => a[1].name.localeCompare(b[1].name));
+
+            sorted.forEach(([empId, emp]) => {
+                let totalHours = 0;
+                let totalDays = 0;
+                const dates = Object.keys(emp.days).sort();
+
+                dates.forEach(date => {
+                    totalDays++;
+                    const dayTimbrages = emp.days[date];
+
+                    const pairs = [];
+                    let currentEntry = null;
+
+                    dayTimbrages.forEach(t => {
+                        if (t.type === 'ENTRÉE') {
+                            currentEntry = t;
+                        } else if (t.type === 'SORTIE' && currentEntry) {
+                            pairs.push({ entry: currentEntry, exit: t });
+                            totalHours += calculateHours(currentEntry.time, t.time, date);
+                            currentEntry = null;
+                        }
+                    });
+
+                    if (currentEntry) {
+                        pairs.push({ entry: currentEntry, exit: null });
+                    }
+
+                    if (pairs.length === 0) {
+                        pairs.push({ entry: null, exit: dayTimbrages[0] });
+                    }
+
+                    pairs.forEach((pair, idx) => {
+                        const entryTime = pair.entry ? pair.entry.time : '-';
+                        const exitTime = pair.exit ? pair.exit.time : '(en cours)';
+                        const hours = (pair.entry && pair.exit)
+                            ? formatHours(calculateHours(pair.entry.time, pair.exit.time, date))
+                            : '-';
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML =
+                            '<td>' + (idx === 0 ? emp.name : '') + '</td>' +
+                            '<td>' + (idx === 0 ? formatDateDisplay(date) : '') + '</td>' +
+                            '<td>' + entryTime + '</td>' +
+                            '<td>' + exitTime + '</td>' +
+                            '<td>' + hours + '</td>';
+                        tbody.appendChild(tr);
+
+                        monthCSVData.push({
+                            employe: emp.name, date: date,
+                            entree: entryTime, sortie: exitTime, heures: hours
+                        });
+                    });
+                });
+
+                const totalTr = document.createElement('tr');
+                totalTr.className = 'subtotal-row';
+                totalTr.innerHTML =
+                    '<td colspan="4" style="text-align:right;">Total ' + emp.name + '</td>' +
+                    '<td><strong>' + formatHours(totalHours) + '</strong></td>';
+                tbody.appendChild(totalTr);
+
+                const card = document.createElement('div');
+                card.className = 'summary-card';
+                card.innerHTML =
+                    '<div class="emp-name">' + emp.name + '</div>' +
+                    '<div class="emp-hours">' + formatHours(totalHours) + '</div>' +
+                    '<div class="emp-days">' + totalDays + ' jour' + (totalDays > 1 ? 's' : '') + '</div>';
+                summaryDiv.appendChild(card);
+            });
+        }
+
+        function exportCSV() {
+            if (monthCSVData.length === 0) { alert('Charge un mois d\'abord'); return; }
+            const bom = '\uFEFF';
+            const headers = 'Employé;Date;Entrée;Sortie;Heures\n';
+            const rows = monthCSVData.map(r =>
+                '"' + r.employe + '";"' + r.date + '";"' + r.entree + '";"' + r.sortie + '";"' + r.heures + '"'
+            ).join('\n');
+            const blob = new Blob([bom + headers + rows], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'pointage_' + document.getElementById('monthFilter').value + '.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function printMonth() {
+            document.getElementById('printPeriod').textContent = 'Période : ' + document.getElementById('monthFilter').value;
+            window.print();
+        }
+
+        // TAB: EMPLOYÉS
+        function loadEmployeesTab() {
+            const employees = Storage.getEmployees();
+            const tbody = document.getElementById('empTableBody');
+            tbody.innerHTML = '';
+
+            if (employees.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" class="empty-state">Aucun employé \u2014 ajoute-en!</td></tr>';
+                return;
+            }
+
+            employees.forEach(emp => {
+                const tr = document.createElement('tr');
+                tr.innerHTML =
+                    '<td>' + emp.name + '</td>' +
+                    '<td class="actions"><button class="btn btn-danger btn-small" onclick="deleteEmployee(\'' + emp.id + '\', \'' + emp.name.replace(/'/g, "\\\\'") + '\')">Supprimer</button></td>';
+                tbody.appendChild(tr);
+            });
+        }
+
+        function addEmployee() {
+            const input = document.getElementById('newEmpName');
+            const name = input.value.trim();
+            if (!name) { alert('Entre un nom'); return; }
+            const exists = Storage.getEmployees().some(e => e.name.toLowerCase() === name.toLowerCase());
+            if (exists) { alert('Cet employé existe déjà'); return; }
+            Storage.addEmployee(name);
+            input.value = '';
+            input.focus();
+            loadEmployeesTab();
+            populateManualEmpSelect();
+        }
+
+        function deleteEmployee(id, name) {
+            if (!confirm('Supprimer ' + name + '? Ses timbrages seront conservés.')) return;
+            Storage.deleteEmployee(id);
+            loadEmployeesTab();
+            populateManualEmpSelect();
+        }
+
+        // TAB: SAUVEGARDE
+        function exportBackup() {
+            const data = Storage.exportAll();
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'pointage_backup_' + todayStr() + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importBackup() {
+            const fileInput = document.getElementById('importFile');
+            if (!fileInput.files.length) { alert('Sélectionne un fichier JSON'); return; }
+            if (!confirm('Attention : ça va remplacer toutes les données actuelles. Continuer?')) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    Storage.importAll(e.target.result);
+                    alert('Données restaurées avec succès!');
+                    initAdmin();
+                } catch (err) {
+                    alert('Erreur : fichier invalide');
+                }
+            };
+            reader.readAsText(fileInput.files[0]);
+        }
+
+        document.getElementById('loginPwd').focus();
+    </script>
+</body>
+</html>
