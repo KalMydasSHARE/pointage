@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Pointage</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="top-bar">
+            <h1>Pointage</h1>
+            <div class="top-bar-right">
+                <span id="syncIndicator" class="sync-indicator hidden"></span>
+                <a href="admin.html">Admin</a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="employee-card">
+                <!-- Sélection employé -->
+                <div class="select-group">
+                    <label for="empSelect">Qui es-tu?</label>
+                    <select id="empSelect" class="big-select">
+                        <option value="">-- Choisis ton nom --</option>
+                    </select>
+                </div>
+
+                <!-- Bouton Timbrer -->
+                <button id="timbrBtn" class="timbrer-btn" disabled>
+                    TIMBRER
+                </button>
+
+                <!-- Status -->
+                <div class="status-bar">
+                    <div class="status-main" id="statusMain">Choisis ton nom pour commencer</div>
+                    <div class="status-sub" id="statusSub"></div>
+                </div>
+
+                <!-- Timbrages du jour -->
+                <div class="today-section">
+                    <h3>Aujourd'hui</h3>
+                    <div id="todayTimings">
+                        <div class="empty-state">Choisis ton nom</div>
+                    </div>
+                    <div id="todayTotal" class="today-total" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        const empSelect = document.getElementById('empSelect');
+        const timbrBtn = document.getElementById('timbrBtn');
+        const statusMain = document.getElementById('statusMain');
+        const statusSub = document.getElementById('statusSub');
+        const todayTimings = document.getElementById('todayTimings');
+        const todayTotal = document.getElementById('todayTotal');
+
+        let selectedEmpId = null;
+        let nextType = null;
+
+        // Charger les employés
+        function loadEmployees() {
+            const employees = Storage.getEmployees();
+            empSelect.innerHTML = '<option value="">-- Choisis ton nom --</option>';
+
+            employees.forEach(emp => {
+                const opt = document.createElement('option');
+                opt.value = emp.id;
+                opt.textContent = emp.name;
+                empSelect.appendChild(opt);
+            });
+
+            if (employees.length === 0) {
+                statusMain.textContent = 'Aucun employé configuré';
+                statusSub.textContent = 'Le gestionnaire doit ajouter les employés (page Admin)';
+            }
+        }
+
+        // Sélection d'un employé
+        empSelect.addEventListener('change', () => {
+            selectedEmpId = empSelect.value;
+
+            if (!selectedEmpId) {
+                timbrBtn.disabled = true;
+                timbrBtn.className = 'timbrer-btn';
+                timbrBtn.textContent = 'TIMBRER';
+                statusMain.textContent = 'Choisis ton nom pour commencer';
+                statusSub.textContent = '';
+                todayTimings.innerHTML = '<div class="empty-state">Choisis ton nom</div>';
+                todayTotal.style.display = 'none';
+                return;
+            }
+
+            refreshStatus();
+            refreshToday();
+        });
+
+        // Rafraîchir le statut
+        function refreshStatus() {
+            if (!selectedEmpId) return;
+
+            const last = Storage.getLastTimbre(selectedEmpId);
+            const empName = empSelect.options[empSelect.selectedIndex].text;
+
+            if (!last || last.type === 'SORTIE') {
+                nextType = 'ENTRÉE';
+                timbrBtn.textContent = 'ENTRÉE';
+                timbrBtn.className = 'timbrer-btn';
+                statusMain.textContent = empName + ' \u2014 prochaine action : ENTRÉE';
+                statusSub.textContent = last ? 'Dernière sortie : ' + last.time : 'Aucun timbre enregistré';
+            } else {
+                nextType = 'SORTIE';
+                timbrBtn.textContent = 'SORTIE';
+                timbrBtn.className = 'timbrer-btn is-sortie';
+                statusMain.textContent = empName + ' \u2014 prochaine action : SORTIE';
+                statusSub.textContent = 'Entré(e) à ' + last.time;
+            }
+
+            timbrBtn.disabled = false;
+        }
+
+        // Rafraîchir les timbrages du jour
+        function refreshToday() {
+            if (!selectedEmpId) return;
+
+            const today = todayStr();
+            const timbrages = Storage.getTimbragesByEmpAndDate(selectedEmpId, today);
+
+            todayTimings.innerHTML = '';
+
+            if (timbrages.length === 0) {
+                todayTimings.innerHTML = '<div class="empty-state">Aucun timbre aujourd\'hui</div>';
+                todayTotal.style.display = 'none';
+                return;
+            }
+
+            timbrages.forEach(t => {
+                const isEntry = t.type === 'ENTRÉE';
+                const row = document.createElement('div');
+                row.className = 'timing-row';
+                row.innerHTML =
+                    '<span class="dot ' + (isEntry ? 'entry' : 'exit') + '"></span>' +
+                    '<span class="time">' + t.time + '</span>' +
+                    '<span class="type">' + t.type + '</span>';
+                todayTimings.appendChild(row);
+            });
+
+            // Calculer total d'heures
+            let totalH = 0;
+            for (let i = 0; i < timbrages.length; i += 2) {
+                if (timbrages[i] && timbrages[i + 1] &&
+                    timbrages[i].type === 'ENTRÉE' && timbrages[i + 1].type === 'SORTIE') {
+                    totalH += calculateHours(timbrages[i].time, timbrages[i + 1].time, today);
+                }
+            }
+
+            if (totalH > 0) {
+                todayTotal.textContent = 'Total aujourd\'hui : ' + formatHours(totalH);
+                todayTotal.style.display = 'block';
+            } else {
+                todayTotal.style.display = 'none';
+            }
+        }
+
+        // Cliquer sur TIMBRER
+        timbrBtn.addEventListener('click', () => {
+            if (!selectedEmpId || !nextType) return;
+
+            timbrBtn.disabled = true;
+            const empName = empSelect.options[empSelect.selectedIndex].text;
+            const now = new Date();
+            const date = todayStr();
+            const time = nowTimeStr();
+
+            Storage.addTimbre(selectedEmpId, empName, nextType, date, time);
+
+            // Flash vert
+            const savedType = nextType;
+            timbrBtn.className = 'timbrer-btn flash-success';
+            timbrBtn.textContent = savedType + ' OK';
+            statusMain.textContent = savedType + ' enregistrée pour ' + empName;
+
+            // Rafraîchir après 1.5s
+            setTimeout(() => {
+                refreshStatus();
+                refreshToday();
+            }, 1500);
+        });
+
+        // Init
+        async function init() {
+            const updated = await GitSync.init();
+            loadEmployees();
+            // Si les données ont été mises à jour depuis GitHub, re-charger
+            if (updated) loadEmployees();
+        }
+        init();
+    </script>
+</body>
+</html>
