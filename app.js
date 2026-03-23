@@ -6,6 +6,7 @@
 // CONFIGURATION
 // ============================================
 const ADMIN_PASSWORD = "choco2026";
+const ACCESS_PASSWORD = "pots2026";  // mot de passe pour accéder au pointage
 
 // GitHub Sync (remplis ces 2 champs)
 const GITHUB_TOKEN = "REMPLACE_MOI";  // ton Personal Access Token GitHub
