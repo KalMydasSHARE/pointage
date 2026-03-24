@@ -62,16 +62,7 @@
       "date": "2026-03-23",
       "time": "23:02",
       "timestamp": "2026-03-23T23:02:00"
-    },
-    {
-      "id": "t_1774375506576_vq3f",
-      "employeeId": "emp_1774308344339_f6c6",
-      "employeeName": "Ethan",
-      "type": "SORTIE",
-      "date": "2026-03-24",
-      "time": "02:01",
-      "timestamp": "2026-03-24T02:01:00"
     }
   ],
-  "exportDate": "2026-03-24T18:05:06.576Z"
+  "exportDate": "2026-03-24T18:05:39.474Z"
 }
