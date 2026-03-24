@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Admin - Pointage</title>
-    <link rel="stylesheet" href="styles.css?v=3">
+    <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
     <!-- LOGIN -->
@@ -54,6 +54,20 @@
         </div>
     </div>
 
+    <!-- MODAL HEURES FÉRIÉES PAR EMPLOYÉ -->
+    <div class="modal-overlay" id="holidayHoursModal" style="display:none;">
+        <div class="modal-box" style="max-width:500px;">
+            <h3 id="holidayHoursTitle">Heures par employé</h3>
+            <p style="color:var(--text-muted);font-size:0.9em;margin-bottom:15px;">Définis combien d'heures chaque employé reçoit pour ce jour férié. Laisse à 0 si l'employé ne travaille pas ce jour-là.</p>
+            <input type="hidden" id="holidayHoursDate">
+            <div id="holidayHoursList"></div>
+            <div style="display:flex;gap:10px;margin-top:15px;justify-content:flex-end;">
+                <button class="btn btn-outline" onclick="closeHolidayHoursModal()">Fermer</button>
+                <button class="btn btn-primary" onclick="saveHolidayHours()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ADMIN PAGE -->
     <div class="page-wrapper" id="adminPage" style="display:none;">
         <div class="top-bar">
@@ -80,9 +94,7 @@
                 <button class="tab-btn" data-tab="backup" onclick="switchTab('backup')">Sauvegarde</button>
             </div>
 
-            <!-- ============================== -->
-            <!-- TAB: AUJOURD'HUI              -->
-            <!-- ============================== -->
+            <!-- TAB: AUJOURD'HUI -->
             <div id="tab-today" class="tab-panel active">
                 <div class="controls-bar">
                     <input type="date" id="dayFilter" class="input-field">
@@ -137,12 +149,13 @@
                 </table>
             </div>
 
-            <!-- ============================== -->
-            <!-- TAB: MENSUEL                  -->
-            <!-- ============================== -->
+            <!-- TAB: MENSUEL -->
             <div id="tab-month" class="tab-panel">
                 <div class="controls-bar">
                     <input type="month" id="monthFilter" class="input-field">
+                    <select id="monthEmpFilter" class="input-field">
+                        <option value="all">Tous les employés</option>
+                    </select>
                     <button class="btn btn-outline" onclick="loadMonthData()">Actualiser</button>
                     <button class="btn btn-primary" onclick="exportCSV()">Exporter CSV</button>
                     <button class="btn btn-outline" onclick="printMonth()">Imprimer</button>
@@ -163,9 +176,7 @@
                 </table>
             </div>
 
-            <!-- ============================== -->
-            <!-- TAB: BALANCE ANNUELLE          -->
-            <!-- ============================== -->
+            <!-- TAB: BALANCE ANNUELLE -->
             <div id="tab-balance" class="tab-panel">
                 <div class="controls-bar">
                     <select id="balanceYear" class="input-field" onchange="loadBalanceData()"></select>
@@ -177,39 +188,22 @@
                 <div id="balanceContent"></div>
             </div>
 
-            <!-- ============================== -->
-            <!-- TAB: EMPLOYÉS                 -->
-            <!-- ============================== -->
+            <!-- TAB: EMPLOYÉS -->
             <div id="tab-employees" class="tab-panel">
                 <div class="controls-bar">
-                    <input type="text" id="newEmpName" class="input-field" placeholder="Nom du nouvel employe" onkeypress="if(event.key==='Enter') addEmployee()">
+                    <input type="text" id="newEmpName" class="input-field" placeholder="Nom du nouvel employé" onkeypress="if(event.key==='Enter') addEmployee()">
                     <button class="btn btn-success" onclick="addEmployee()">Ajouter</button>
                 </div>
 
+                <p style="color:var(--text-muted);font-size:0.9em;margin-bottom:15px;">Base : 182h/mois = 100%. Le taux est fixe pour chaque employé (appliqué à tous les mois).</p>
+
                 <table class="data-table">
-                    <thead><tr><th>Nom</th><th>% Travail</th><th>Heures dues</th><th class="actions">Actions</th></tr></thead>
+                    <thead><tr><th>Nom</th><th>Taux (%)</th><th>Heures dues/mois</th><th class="actions">Actions</th></tr></thead>
                     <tbody id="empTableBody"></tbody>
                 </table>
-
-                <div class="contract-section" style="margin-top:25px;">
-                    <h3 style="color:var(--chocolate);margin-bottom:15px;">Pourcentage de travail par mois</h3>
-                    <p style="color:var(--text-muted);font-size:0.9em;margin-bottom:15px;">Base : 182h/mois = 100%. Modifie le pourcentage pour ajuster les heures dues.</p>
-                    <div class="form-row" style="margin-bottom:15px;">
-                        <div class="form-group"><label>Employe</label><select id="contractEmp" class="input-field"></select></div>
-                        <div class="form-group"><label>Mois</label><input type="month" id="contractMonth" class="input-field"></div>
-                        <div class="form-group"><label>Pourcentage (%)</label><input type="number" id="contractPct" class="input-field" min="0" max="100" value="100" step="5"></div>
-                        <div class="form-group" style="justify-content:flex-end;"><button class="btn btn-success" onclick="saveContract()">Enregistrer</button></div>
-                    </div>
-                    <table class="data-table">
-                        <thead><tr><th>Employe</th><th>Mois</th><th>%</th><th>Heures dues</th><th class="actions">Actions</th></tr></thead>
-                        <tbody id="contractTableBody"></tbody>
-                    </table>
-                </div>
             </div>
 
-            <!-- ============================== -->
-            <!-- TAB: JOURS FÉRIÉS             -->
-            <!-- ============================== -->
+            <!-- TAB: JOURS FÉRIÉS -->
             <div id="tab-holidays" class="tab-panel">
                 <div class="manual-form">
                     <h3>Ajouter un jour férié</h3>
@@ -220,7 +214,7 @@
                         </div>
                         <div class="form-group" style="flex:2;">
                             <label>Nom</label>
-                            <input type="text" id="holidayName" class="input-field" placeholder="Ex: Jour de l'An, Fête nationale..." style="width:100%;">
+                            <input type="text" id="holidayName" class="input-field" placeholder="Ex: Noël, Ascension..." style="width:100%;">
                         </div>
                         <div class="form-group" style="justify-content:flex-end;">
                             <button class="btn btn-success" onclick="addHoliday()">Ajouter</button>
@@ -229,24 +223,22 @@
                 </div>
 
                 <div style="margin-bottom:15px;">
-                    <button class="btn btn-outline btn-small" onclick="addDefaultHolidays()">Ajouter les fériés Québec 2026</button>
+                    <button class="btn btn-outline btn-small" onclick="addDefaultHolidays()">Ajouter les fériés Suisse 2026</button>
                 </div>
 
                 <p style="color:var(--text-muted);font-size:0.9em;margin-bottom:15px;">
-                    Les jours fériés sont exclus du calcul des jours ouvrés. Cela réduit l'objectif mensuel proportionnellement.
+                    Les jours fériés sont exclus des jours ouvrés. Clique sur "Heures" pour définir combien d'heures chaque employé reçoit ce jour-là.
                 </p>
 
                 <table class="data-table">
-                    <thead><tr><th>Date</th><th>Jour</th><th>Nom</th><th class="actions">Actions</th></tr></thead>
+                    <thead><tr><th>Date</th><th>Jour</th><th>Nom</th><th>Heures</th><th class="actions">Actions</th></tr></thead>
                     <tbody id="holidayTableBody"></tbody>
                 </table>
 
                 <div id="holidayStats" style="margin-top:20px;"></div>
             </div>
 
-            <!-- ============================== -->
-            <!-- TAB: SAUVEGARDE               -->
-            <!-- ============================== -->
+            <!-- TAB: SAUVEGARDE -->
             <div id="tab-backup" class="tab-panel">
                 <div class="backup-section">
                     <div class="backup-card">
@@ -276,7 +268,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=3"></script>
+    <script src="app.js?v=4"></script>
     <script>
         // ============================================
         // LOGIN
@@ -315,9 +307,8 @@
             document.getElementById('dayFilter').value = todayStr();
             document.getElementById('monthFilter').value = currentMonthStr();
             document.getElementById('manualDate').value = todayStr();
-            document.getElementById('contractMonth').value = currentMonthStr();
             populateManualEmpSelect();
-            populateContractEmpSelect();
+            populateMonthEmpFilter();
             populateBalanceSelects();
             loadDayData();
         }
@@ -325,6 +316,16 @@
         function populateManualEmpSelect() {
             const sel = document.getElementById('manualEmp');
             sel.innerHTML = '';
+            Storage.getEmployees().forEach(e => {
+                const opt = document.createElement('option');
+                opt.value = e.id; opt.textContent = e.name;
+                sel.appendChild(opt);
+            });
+        }
+
+        function populateMonthEmpFilter() {
+            const sel = document.getElementById('monthEmpFilter');
+            sel.innerHTML = '<option value="all">Tous les employés</option>';
             Storage.getEmployees().forEach(e => {
                 const opt = document.createElement('option');
                 opt.value = e.id; opt.textContent = e.name;
@@ -436,15 +437,18 @@
         }
 
         // ============================================
-        // TAB: MENSUEL (rapport nettoyé — pas de cards résumé)
+        // TAB: MENSUEL (avec filtre par employé + impression)
         // ============================================
         let monthCSVData = [];
 
         function loadMonthData() {
             const monthValue = document.getElementById('monthFilter').value;
+            const empFilter = document.getElementById('monthEmpFilter').value;
             if (!monthValue) return;
 
-            const timbrages = Storage.getTimbragesByMonth(monthValue);
+            let timbrages = Storage.getTimbragesByMonth(monthValue);
+            if (empFilter !== 'all') timbrages = timbrages.filter(t => t.employeeId === empFilter);
+
             const tbody = document.getElementById('monthTableBody');
             tbody.innerHTML = '';
             monthCSVData = [];
@@ -454,7 +458,6 @@
                 return;
             }
 
-            // Organiser par employé > par date
             const byEmployee = {};
             timbrages.forEach(t => {
                 if (!byEmployee[t.employeeId]) byEmployee[t.employeeId] = { name: t.employeeName, days: {} };
@@ -468,10 +471,9 @@
                 let totalHours = 0;
                 const dates = Object.keys(emp.days).sort();
 
-                // Header employé
                 const headerTr = document.createElement('tr');
                 headerTr.className = 'day-header';
-                headerTr.innerHTML = '<td colspan="6">' + emp.name + '</td>';
+                headerTr.innerHTML = '<td colspan="6">' + emp.name + ' (' + Storage.getRate(empId) + '%)</td>';
                 tbody.appendChild(headerTr);
 
                 dates.forEach(date => {
@@ -514,21 +516,27 @@
                     });
                 });
 
-                // Total + Balance
-                const pct = Storage.getContract(empId, monthValue);
-                const target = CONTRACT_BASE_HOURS * (pct / 100);
-                const balance = totalHours - target;
+                // Holiday hours
+                const holidayHours = getHolidayHoursForMonth(empId, monthValue);
+
+                // Total + Balance (proratisée)
+                const pct = Storage.getRate(empId);
+                const totalCredit = totalHours + holidayHours;
+                const proratedTarget = getProratedTarget(empId, monthValue);
+                const balance = totalCredit - proratedTarget;
                 const balCls = balance >= 0 ? 'balance-positive' : 'balance-negative';
+
+                let totalLabel = 'Total ' + emp.name + ' (' + pct + '%)';
+                if (holidayHours > 0) totalLabel += ' — dont ' + formatHours(holidayHours) + ' fériés';
 
                 const totalTr = document.createElement('tr');
                 totalTr.className = 'subtotal-row';
                 totalTr.innerHTML =
-                    '<td colspan="4" style="text-align:right;"><strong>Total ' + emp.name + '</strong> (' + pct + '% = ' + formatHours(target) + ' dues)</td>' +
-                    '<td><strong>' + formatHours(totalHours) + '</strong></td>' +
+                    '<td colspan="4" style="text-align:right;"><strong>' + totalLabel + '</strong></td>' +
+                    '<td><strong>' + formatHours(totalCredit) + '</strong></td>' +
                     '<td><strong class="' + balCls + '">' + formatBalance(balance) + '</strong></td>';
                 tbody.appendChild(totalTr);
 
-                // Séparateur
                 const sepTr = document.createElement('tr');
                 sepTr.innerHTML = '<td colspan="6" style="padding:4px;border:none;"></td>';
                 tbody.appendChild(sepTr);
@@ -562,34 +570,42 @@
         }
 
         function printMonth() {
-            document.getElementById('printPeriod').textContent = 'Période : ' + document.getElementById('monthFilter').value;
+            const empFilter = document.getElementById('monthEmpFilter');
+            const empName = empFilter.value === 'all' ? 'Tous' : empFilter.options[empFilter.selectedIndex].text;
+            document.getElementById('printPeriod').textContent = 'Période : ' + monthNameFr(document.getElementById('monthFilter').value) + ' — ' + empName;
             window.print();
         }
 
         // ============================================
-        // TAB: EMPLOYÉS
+        // TAB: EMPLOYÉS (taux fixe par employé)
         // ============================================
         function loadEmployeesTab() {
             const employees = Storage.getEmployees();
             const tbody = document.getElementById('empTableBody');
             tbody.innerHTML = '';
-            const cm = currentMonthStr();
 
             if (employees.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Aucun employé</td></tr>';
                 return;
             }
             employees.forEach(emp => {
-                const pct = Storage.getContract(emp.id, cm);
+                const pct = Storage.getRate(emp.id);
                 const target = CONTRACT_BASE_HOURS * (pct / 100);
                 const tr = document.createElement('tr');
                 tr.innerHTML =
-                    '<td>' + emp.name + '</td><td><strong>' + pct + '%</strong></td><td>' + formatHours(target) + '</td>' +
+                    '<td>' + emp.name + '</td>' +
+                    '<td><input type="number" class="pct-input" min="0" max="100" step="5" value="' + pct + '" onchange="updateRate(\'' + emp.id + '\', this.value)" style="width:70px;text-align:center;"></td>' +
+                    '<td>' + formatHours(target) + '</td>' +
                     '<td class="actions"><button class="btn btn-danger btn-small" onclick="deleteEmployee(\'' + emp.id + '\', \'' + emp.name.replace(/'/g,"\\'") + '\')">Supprimer</button></td>';
                 tbody.appendChild(tr);
             });
-            loadContractsTable();
-            populateContractEmpSelect();
+        }
+
+        function updateRate(empId, value) {
+            const pct = parseInt(value);
+            if (isNaN(pct) || pct < 0 || pct > 100) { alert('Pourcentage entre 0 et 100'); return; }
+            Storage.setRate(empId, pct);
+            loadEmployeesTab();
         }
 
         function addEmployee() {
@@ -601,6 +617,7 @@
             input.value = '';
             loadEmployeesTab();
             populateManualEmpSelect();
+            populateMonthEmpFilter();
         }
 
         function deleteEmployee(id, name) {
@@ -608,10 +625,11 @@
             Storage.deleteEmployee(id);
             loadEmployeesTab();
             populateManualEmpSelect();
+            populateMonthEmpFilter();
         }
 
         // ============================================
-        // TAB: BALANCE ANNUELLE
+        // TAB: BALANCE ANNUELLE (jour par jour)
         // ============================================
         function populateBalanceSelects() {
             const yearSel = document.getElementById('balanceYear');
@@ -635,19 +653,22 @@
             if (emps.length === 0) { container.innerHTML = '<div class="empty-state">Aucun employé</div>'; return; }
 
             emps.forEach(emp => {
+                const pct = Storage.getRate(emp.id);
                 const yearData = getYearBalance(emp.id, parseInt(year));
-                let html = '<div class="balance-employee-card"><h3 style="color:var(--chocolate);margin-bottom:12px;">' + emp.name + ' — ' + year + '</h3>';
+                let html = '<div class="balance-employee-card"><h3 style="color:var(--chocolate);margin-bottom:12px;">' + emp.name + ' — ' + year + ' (' + pct + '%)</h3>';
                 if (yearData.monthDetails.length === 0) {
                     html += '<div class="empty-state">Aucune donnée</div>';
                 } else {
-                    html += '<table class="data-table"><thead><tr><th>Mois</th><th>%</th><th>Heures dues</th><th>Travaillées</th><th>Balance</th><th>Cumul</th></tr></thead><tbody>';
+                    html += '<table class="data-table"><thead><tr><th>Mois</th><th>Jours</th><th>Heures dues</th><th>Travaillées</th><th>Fériés</th><th>Balance</th><th>Cumul</th></tr></thead><tbody>';
                     yearData.monthDetails.forEach(md => {
-                        const pct = Storage.getContract(emp.id, md.yearMonth);
                         const bCls = md.balance >= 0 ? 'balance-positive' : 'balance-negative';
                         const cCls = md.cumBalance >= 0 ? 'balance-positive' : 'balance-negative';
-                        html += '<tr' + (md.worked > 0 ? '' : ' style="opacity:0.5;"') + '>' +
-                            '<td>' + monthNameFr(md.yearMonth) + '</td><td>' + pct + '%</td><td>' + formatHours(md.target) + '</td>' +
+                        html += '<tr>' +
+                            '<td>' + monthNameFr(md.yearMonth) + '</td>' +
+                            '<td>' + md.elapsedDays + '/' + md.totalDays + '</td>' +
+                            '<td>' + formatHours(md.target) + '</td>' +
                             '<td>' + (md.worked > 0 ? formatHours(md.worked) : '-') + '</td>' +
+                            '<td>' + (md.holidayHours > 0 ? formatHours(md.holidayHours) : '-') + '</td>' +
                             '<td><strong class="' + bCls + '">' + formatBalance(md.balance) + '</strong></td>' +
                             '<td><strong class="' + cCls + '">' + formatBalance(md.cumBalance) + '</strong></td></tr>';
                     });
@@ -662,28 +683,38 @@
         }
 
         // ============================================
-        // TAB: JOURS FÉRIÉS
+        // TAB: JOURS FÉRIÉS (Suisse + heures par employé)
         // ============================================
         function loadHolidaysTab() {
             const holidays = Storage.getHolidays();
+            const employees = Storage.getEmployees();
             const tbody = document.getElementById('holidayTableBody');
             tbody.innerHTML = '';
 
             if (holidays.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Aucun jour férié configuré</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Aucun jour férié configuré</td></tr>';
             } else {
                 holidays.forEach(h => {
+                    // Count configured hours
+                    let hoursInfo = '';
+                    if (h.employeeHours && Object.keys(h.employeeHours).length > 0) {
+                        const configured = Object.entries(h.employeeHours).filter(([k,v]) => v > 0).length;
+                        hoursInfo = configured + '/' + employees.length + ' employés';
+                    } else {
+                        hoursInfo = '<span style="color:#e53935;">Non configuré</span>';
+                    }
+
                     const tr = document.createElement('tr');
                     tr.innerHTML =
                         '<td>' + h.date + '</td>' +
                         '<td>' + formatDateDisplay(h.date) + '</td>' +
                         '<td>' + escapeHtml(h.name) + '</td>' +
+                        '<td><button class="btn btn-outline btn-small" onclick="openHolidayHoursModal(\'' + h.date + '\')">' + hoursInfo + '</button></td>' +
                         '<td class="actions"><button class="btn btn-danger btn-small" onclick="removeHoliday(\'' + h.date + '\')">Supprimer</button></td>';
                     tbody.appendChild(tr);
                 });
             }
 
-            // Stats: jours ouvrés par mois
             const stats = document.getElementById('holidayStats');
             const ym = currentMonthStr();
             const workDays = getWorkingDaysInMonth(ym);
@@ -709,76 +740,65 @@
             loadHolidaysTab();
         }
 
-        function addDefaultHolidays() {
-            const defaults = [
-                { date: '2026-01-01', name: 'Jour de l\'An' },
-                { date: '2026-01-02', name: 'Lendemain du Jour de l\'An' },
-                { date: '2026-04-03', name: 'Vendredi saint' },
-                { date: '2026-04-06', name: 'Lundi de Pâques' },
-                { date: '2026-05-18', name: 'Journée nationale des patriotes' },
-                { date: '2026-06-24', name: 'Fête nationale du Québec' },
-                { date: '2026-07-01', name: 'Fête du Canada' },
-                { date: '2026-09-07', name: 'Fête du Travail' },
-                { date: '2026-10-12', name: 'Action de grâce' },
-                { date: '2026-12-25', name: 'Noël' },
-                { date: '2026-12-26', name: 'Lendemain de Noël' }
-            ];
-            let added = 0;
-            defaults.forEach(h => { if (Storage.addHoliday(h.date, h.name)) added++; });
-            alert(added + ' jour(s) férié(s) ajouté(s)');
+        // ── Modal heures fériées par employé ──
+        function openHolidayHoursModal(date) {
+            const holiday = Storage.getHolidays().find(h => h.date === date);
+            if (!holiday) return;
+
+            document.getElementById('holidayHoursDate').value = date;
+            document.getElementById('holidayHoursTitle').textContent = holiday.name + ' (' + formatDateDisplay(date) + ')';
+
+            const employees = Storage.getEmployees();
+            const list = document.getElementById('holidayHoursList');
+            list.innerHTML = '';
+
+            employees.forEach(emp => {
+                const currentHours = (holiday.employeeHours && holiday.employeeHours[emp.id]) || 0;
+                const pct = Storage.getRate(emp.id);
+                const div = document.createElement('div');
+                div.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:8px;';
+                div.innerHTML =
+                    '<span style="flex:1;">' + emp.name + ' (' + pct + '%)</span>' +
+                    '<input type="number" class="input-field" data-emp="' + emp.id + '" min="0" max="24" step="0.5" value="' + currentHours + '" style="width:80px;text-align:center;">' +
+                    '<span style="color:var(--text-muted);font-size:0.85em;">heures</span>';
+                list.appendChild(div);
+            });
+
+            document.getElementById('holidayHoursModal').style.display = 'flex';
+        }
+
+        function closeHolidayHoursModal() {
+            document.getElementById('holidayHoursModal').style.display = 'none';
+        }
+
+        function saveHolidayHours() {
+            const date = document.getElementById('holidayHoursDate').value;
+            const inputs = document.querySelectorAll('#holidayHoursList input[data-emp]');
+            inputs.forEach(input => {
+                const empId = input.dataset.emp;
+                const hours = parseFloat(input.value) || 0;
+                Storage.setHolidayHours(date, empId, hours);
+            });
+            closeHolidayHoursModal();
             loadHolidaysTab();
         }
 
-        // ============================================
-        // CONTRATS
-        // ============================================
-        function populateContractEmpSelect() {
-            const sel = document.getElementById('contractEmp');
-            if (!sel) return;
-            sel.innerHTML = '';
-            Storage.getEmployees().forEach(e => { const o = document.createElement('option'); o.value = e.id; o.textContent = e.name; sel.appendChild(o); });
-        }
-
-        function saveContract() {
-            const empId = document.getElementById('contractEmp').value;
-            const yearMonth = document.getElementById('contractMonth').value;
-            const pct = parseInt(document.getElementById('contractPct').value);
-            if (!empId || !yearMonth) { alert('Remplis tous les champs'); return; }
-            if (isNaN(pct) || pct < 0 || pct > 100) { alert('Pourcentage entre 0 et 100'); return; }
-            Storage.setContract(empId, yearMonth, pct);
-            loadContractsTable();
-            loadEmployeesTab();
-        }
-
-        function loadContractsTable() {
-            const tbody = document.getElementById('contractTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-            const contracts = Storage.getContracts();
-            const employees = Storage.getEmployees();
-
-            if (contracts.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Tous à 100% (182h) par défaut</td></tr>';
-                return;
-            }
-            [...contracts].sort((a, b) => b.yearMonth !== a.yearMonth ? b.yearMonth.localeCompare(a.yearMonth) : a.employeeId.localeCompare(b.employeeId))
-            .forEach(c => {
-                const emp = employees.find(e => e.id === c.employeeId);
-                const target = CONTRACT_BASE_HOURS * (c.percentage / 100);
-                const tr = document.createElement('tr');
-                tr.innerHTML =
-                    '<td>' + (emp ? emp.name : '(supprimé)') + '</td><td>' + monthNameFr(c.yearMonth) + '</td><td><strong>' + c.percentage + '%</strong></td>' +
-                    '<td>' + formatHours(target) + '</td>' +
-                    '<td class="actions"><button class="btn btn-danger btn-small" onclick="deleteContract(\'' + c.employeeId + '\', \'' + c.yearMonth + '\')">Supprimer</button></td>';
-                tbody.appendChild(tr);
-            });
-        }
-
-        function deleteContract(empId, yearMonth) {
-            if (!confirm('Remettre à 100%?')) return;
-            Storage.saveContracts(Storage.getContracts().filter(c => !(c.employeeId === empId && c.yearMonth === yearMonth)));
-            loadContractsTable();
-            loadEmployeesTab();
+        function addDefaultHolidays() {
+            const defaults = [
+                { date: '2026-01-01', name: 'Nouvel An' },
+                { date: '2026-01-02', name: 'Saint-Berchtold' },
+                { date: '2026-04-03', name: 'Vendredi Saint' },
+                { date: '2026-04-06', name: 'Lundi de Pâques' },
+                { date: '2026-05-14', name: 'Ascension' },
+                { date: '2026-05-25', name: 'Lundi de Pentecôte' },
+                { date: '2026-08-01', name: 'Fête nationale suisse' },
+                { date: '2026-12-25', name: 'Noël' },
+                { date: '2026-12-26', name: 'Saint-Étienne' }
+            ];
+            let added = 0;
+            defaults.forEach(h => { if (Storage.addHoliday(h.date, h.name)) added++; });
+            alert(added + ' jour(s) férié(s) ajouté(s). N\'oublie pas de configurer les heures par employé!');
+            loadHolidaysTab();
         }
 
         // ============================================

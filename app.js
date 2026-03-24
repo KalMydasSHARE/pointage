@@ -127,31 +127,30 @@ const Storage = {
             .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
     },
 
-    // ── Contrats ──
-    getContracts() {
-        return JSON.parse(localStorage.getItem('pointage_contracts') || '[]');
+    // ── Taux fixe par employé ──
+    getRates() {
+        return JSON.parse(localStorage.getItem('pointage_rates') || '{}');
     },
-    saveContracts(contracts) {
-        localStorage.setItem('pointage_contracts', JSON.stringify(contracts));
+    saveRates(rates) {
+        localStorage.setItem('pointage_rates', JSON.stringify(rates));
         GitSync.push();
     },
-    setContract(employeeId, yearMonth, percentage) {
-        const contracts = this.getContracts();
-        const idx = contracts.findIndex(c => c.employeeId === employeeId && c.yearMonth === yearMonth);
-        if (idx >= 0) contracts[idx].percentage = percentage;
-        else contracts.push({ employeeId, yearMonth, percentage });
-        localStorage.setItem('pointage_contracts', JSON.stringify(contracts));
+    setRate(employeeId, percentage) {
+        const rates = this.getRates();
+        rates[employeeId] = percentage;
+        localStorage.setItem('pointage_rates', JSON.stringify(rates));
         GitSync.push();
     },
+    getRate(employeeId) {
+        const rates = this.getRates();
+        return rates[employeeId] !== undefined ? rates[employeeId] : 100;
+    },
+    // Backward compat: getContract falls back to fixed rate
     getContract(employeeId, yearMonth) {
-        const found = this.getContracts().find(c => c.employeeId === employeeId && c.yearMonth === yearMonth);
-        return found ? found.percentage : 100;
-    },
-    getContractsByEmployee(employeeId) {
-        return this.getContracts().filter(c => c.employeeId === employeeId);
+        return this.getRate(employeeId);
     },
 
-    // ── Jours fériés ──
+    // ── Jours fériés (avec heures par employé) ──
     getHolidays() {
         return JSON.parse(localStorage.getItem('pointage_holidays') || '[]');
     },
@@ -162,7 +161,7 @@ const Storage = {
     addHoliday(date, name) {
         const holidays = this.getHolidays();
         if (holidays.some(h => h.date === date)) return false;
-        holidays.push({ date, name });
+        holidays.push({ date, name, employeeHours: {} });
         holidays.sort((a, b) => a.date.localeCompare(b.date));
         localStorage.setItem('pointage_holidays', JSON.stringify(holidays));
         GitSync.push();
@@ -173,6 +172,20 @@ const Storage = {
         localStorage.setItem('pointage_holidays', JSON.stringify(holidays));
         GitSync.push();
     },
+    setHolidayHours(date, employeeId, hours) {
+        const holidays = this.getHolidays();
+        const h = holidays.find(x => x.date === date);
+        if (!h) return;
+        if (!h.employeeHours) h.employeeHours = {};
+        h.employeeHours[employeeId] = hours;
+        localStorage.setItem('pointage_holidays', JSON.stringify(holidays));
+        GitSync.push();
+    },
+    getHolidayHoursForEmployee(date, employeeId) {
+        const h = this.getHolidays().find(x => x.date === date);
+        if (!h || !h.employeeHours) return 0;
+        return h.employeeHours[employeeId] || 0;
+    },
     isHoliday(dateStr) {
         return this.getHolidays().some(h => h.date === dateStr);
     },
@@ -182,7 +195,7 @@ const Storage = {
         return JSON.stringify({
             employees: this.getEmployees(),
             timbrages: this.getTimbrages(),
-            contracts: this.getContracts(),
+            rates: this.getRates(),
             holidays: this.getHolidays(),
             exportDate: new Date().toISOString()
         }, null, 2);
@@ -191,8 +204,14 @@ const Storage = {
         const data = JSON.parse(jsonString);
         if (data.employees) localStorage.setItem('pointage_employees', JSON.stringify(data.employees));
         if (data.timbrages) localStorage.setItem('pointage_timbrages', JSON.stringify(data.timbrages));
-        if (data.contracts) localStorage.setItem('pointage_contracts', JSON.stringify(data.contracts));
+        if (data.rates) localStorage.setItem('pointage_rates', JSON.stringify(data.rates));
         if (data.holidays) localStorage.setItem('pointage_holidays', JSON.stringify(data.holidays));
+        // Backward compat: migrate old contracts to rates
+        if (data.contracts && !data.rates) {
+            const rates = {};
+            data.contracts.forEach(c => { if (!rates[c.employeeId]) rates[c.employeeId] = c.percentage; });
+            localStorage.setItem('pointage_rates', JSON.stringify(rates));
+        }
     }
 };
 
@@ -220,6 +239,7 @@ const GitSync = {
             if (response.ok) {
                 this._sha = (await response.json()).content.sha;
                 this._updateIndicator('ok');
+                console.log('GitHub sync OK');
             } else {
                 const err = await response.json();
                 if (response.status === 409 || response.status === 422) { await this.pull(); this._pushing = false; return this.push(); }
@@ -245,9 +265,11 @@ const GitSync = {
                 if ((data.timbrages || []).length > Storage.getTimbrages().length) {
                     Storage.importAll(content);
                     this._updateIndicator('ok');
+                    console.log('GitHub pull: données mises à jour');
                     return true;
                 }
                 this._updateIndicator('ok');
+                console.log('GitHub pull: données locales à jour');
                 return false;
             } else if (response.status === 404) { this._sha = null; this._updateIndicator('ok'); return false; }
             else { this._updateIndicator('error'); return false; }
@@ -344,7 +366,7 @@ function getWorkingDaysElapsed(yearMonth) {
 // CALCUL HEURES / BALANCE
 // ============================================
 function getTargetHours(employeeId, yearMonth) {
-    return CONTRACT_BASE_HOURS * (Storage.getContract(employeeId, yearMonth) / 100);
+    return CONTRACT_BASE_HOURS * (Storage.getRate(employeeId) / 100);
 }
 function getProratedTarget(employeeId, yearMonth) {
     const total = getWorkingDaysInMonth(yearMonth);
@@ -355,6 +377,7 @@ function getDailyTarget(employeeId, yearMonth) {
     const wd = getWorkingDaysInMonth(yearMonth);
     return wd > 0 ? getTargetHours(employeeId, yearMonth) / wd : 0;
 }
+
 function getWorkedHoursForMonth(employeeId, yearMonth) {
     const timbrages = Storage.getTimbragesByMonth(yearMonth).filter(t => t.employeeId === employeeId);
     const byDate = {};
@@ -380,31 +403,68 @@ function getWorkedHoursForDay(employeeId, dateStr) {
     return total;
 }
 
-// Info complète pour vue employé (friendly, sans gros négatifs)
+// Heures fériées créditées pour un employé dans un mois
+function getHolidayHoursForMonth(employeeId, yearMonth) {
+    const holidays = Storage.getHolidays().filter(h => h.date.startsWith(yearMonth));
+    let total = 0;
+    holidays.forEach(h => {
+        total += (h.employeeHours && h.employeeHours[employeeId]) || 0;
+    });
+    return total;
+}
+
+// Info complète pour vue employé (friendly, balance jour par jour depuis zéro)
 function getEmployeeMonthInfo(employeeId) {
     const ym = currentMonthStr();
-    const pct = Storage.getContract(employeeId, ym);
+    const pct = Storage.getRate(employeeId);
     const monthTarget = getTargetHours(employeeId, ym);
     const worked = getWorkedHoursForMonth(employeeId, ym);
-    const remaining = Math.max(0, monthTarget - worked);
+    const holidayHours = getHolidayHoursForMonth(employeeId, ym);
+    const totalCredit = worked + holidayHours;
+    const remaining = Math.max(0, monthTarget - totalCredit);
     const proratedTarget = getProratedTarget(employeeId, ym);
-    const proratedBalance = worked - proratedTarget;
+    const proratedBalance = totalCredit - proratedTarget;
     const workedToday = getWorkedHoursForDay(employeeId, todayStr());
     const dailyTarget = getDailyTarget(employeeId, ym);
-    const progressPct = monthTarget > 0 ? Math.min(100, Math.round((worked / monthTarget) * 100)) : 0;
-    return { ym, pct, monthTarget, worked, remaining, proratedTarget, proratedBalance, workedToday, dailyTarget, progressPct,
+    const progressPct = monthTarget > 0 ? Math.min(100, Math.round((totalCredit / monthTarget) * 100)) : 0;
+    return { ym, pct, monthTarget, worked, holidayHours, totalCredit, remaining, proratedTarget, proratedBalance, workedToday, dailyTarget, progressPct,
              totalWorkDays: getWorkingDaysInMonth(ym), elapsedWorkDays: getWorkingDaysElapsed(ym) };
 }
 
-// Balance annuelle (admin seulement)
+// Balance annuelle jour par jour (pas de gros négatif au départ)
 function getYearBalance(employeeId, year) {
     let cum = 0; const details = [];
+    const now = new Date();
     for (let m = 1; m <= 12; m++) {
         const ym = year + '-' + String(m).padStart(2,'0');
+        // Ne pas calculer les mois futurs
+        if (new Date(year, m-1, 1) > now) break;
+
         const worked = getWorkedHoursForMonth(employeeId, ym);
-        const target = getTargetHours(employeeId, ym);
-        const bal = worked - target;
-        if (new Date(year, m-1, 1) <= new Date()) { cum += bal; details.push({ yearMonth: ym, worked, target, balance: bal, cumBalance: cum }); }
+        const holidayHours = getHolidayHoursForMonth(employeeId, ym);
+        const totalCredit = worked + holidayHours;
+
+        // Balance proratisée: seulement les jours ouvrés écoulés comptent
+        const proratedTarget = getProratedTarget(employeeId, ym);
+        const bal = totalCredit - proratedTarget;
+
+        // Ne montrer que si l'employé a des données OU c'est le mois courant
+        const isCurrent = (year === now.getFullYear() && m === now.getMonth()+1);
+        if (totalCredit > 0 || isCurrent) {
+            cum += bal;
+            details.push({
+                yearMonth: ym,
+                worked: worked,
+                holidayHours: holidayHours,
+                totalCredit: totalCredit,
+                target: proratedTarget,
+                fullTarget: getTargetHours(employeeId, ym),
+                balance: bal,
+                cumBalance: cum,
+                elapsedDays: getWorkingDaysElapsed(ym),
+                totalDays: getWorkingDaysInMonth(ym)
+            });
+        }
     }
     return { cumBalance: cum, monthDetails: details };
 }
