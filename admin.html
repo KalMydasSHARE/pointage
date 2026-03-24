@@ -40,11 +40,13 @@
             <div class="tabs">
                 <button class="tab-btn active" data-tab="today" onclick="switchTab('today')">Aujourd'hui</button>
                 <button class="tab-btn" data-tab="month" onclick="switchTab('month')">Mensuel</button>
-                <button class="tab-btn" data-tab="employees" onclick="switchTab('employees')">Employés</button>
+                <button class="tab-btn" data-tab="employees" onclick="switchTab('employees')">EmployÃ©s</button>
                 <button class="tab-btn" data-tab="backup" onclick="switchTab('backup')">Sauvegarde</button>
             </div>
 
-            <!-- TAB: AUJOURD'HUI -->
+            <!-- ============================== -->
+            <!-- TAB: AUJOURD'HUI              -->
+            <!-- ============================== -->
             <div id="tab-today" class="tab-panel active">
                 <div class="controls-bar">
                     <input type="date" id="dayFilter" class="input-field">
@@ -56,13 +58,13 @@
                     <h3>Ajouter un timbre manuellement</h3>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Employé</label>
+                            <label>EmployÃ©</label>
                             <select id="manualEmp" class="input-field"></select>
                         </div>
                         <div class="form-group">
                             <label>Type</label>
                             <select id="manualType" class="input-field">
-                                <option value="ENTRÉE">ENTRÉE</option>
+                                <option value="ENTRÃE">ENTRÃE</option>
                                 <option value="SORTIE">SORTIE</option>
                             </select>
                         </div>
@@ -84,7 +86,7 @@
                     <thead>
                         <tr>
                             <th>Heure</th>
-                            <th>Employé</th>
+                            <th>EmployÃ©</th>
                             <th>Type</th>
                             <th class="actions">Actions</th>
                         </tr>
@@ -93,7 +95,9 @@
                 </table>
             </div>
 
-            <!-- TAB: MENSUEL -->
+            <!-- ============================== -->
+            <!-- TAB: MENSUEL                  -->
+            <!-- ============================== -->
             <div id="tab-month" class="tab-panel">
                 <div class="controls-bar">
                     <input type="month" id="monthFilter" class="input-field">
@@ -107,9 +111,9 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Employé</th>
+                            <th>EmployÃ©</th>
                             <th>Date</th>
-                            <th>Entrée</th>
+                            <th>EntrÃ©e</th>
                             <th>Sortie</th>
                             <th>Heures</th>
                         </tr>
@@ -118,11 +122,13 @@
                 </table>
             </div>
 
-            <!-- TAB: EMPLOYÉS -->
+            <!-- ============================== -->
+            <!-- TAB: EMPLOYÃS                 -->
+            <!-- ============================== -->
             <div id="tab-employees" class="tab-panel">
                 <div class="controls-bar">
                     <input type="text" id="newEmpName" class="input-field"
-                           placeholder="Nom du nouvel employé"
+                           placeholder="Nom du nouvel employÃ©"
                            onkeypress="if(event.key==='Enter') addEmployee()">
                     <button class="btn btn-success" onclick="addEmployee()">Ajouter</button>
                 </div>
@@ -138,18 +144,31 @@
                 </table>
             </div>
 
-            <!-- TAB: SAUVEGARDE -->
+            <!-- ============================== -->
+            <!-- TAB: SAUVEGARDE               -->
+            <!-- ============================== -->
             <div id="tab-backup" class="tab-panel">
                 <div class="backup-section">
-                    <div class="backup-card">
-                        <h3>Exporter les données</h3>
-                        <p>Télécharge toutes les données (employés + timbrages) en fichier JSON. Garde ce fichier en sécurité.</p>
-                        <button class="btn btn-primary" onclick="exportBackup()">Télécharger la sauvegarde</button>
+                <div class="backup-card">
+                        <h3>Synchronisation GitHub</h3>
+                        <p>Entre ton token GitHub pour activer la sauvegarde automatique sur GitHub. Le token est stockÃ© uniquement dans ce navigateur.</p>
+                        <input type="password" id="githubTokenInput" class="input-field" placeholder="github_pat_..." style="margin-bottom:10px;font-family:monospace;">
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn btn-success" onclick="saveGitToken()">Enregistrer le token</button>
+                            <button class="btn btn-outline" onclick="testGitSync()">Tester la connexion</button>
+                        </div>
+                        <div id="gitStatus" style="margin-top:10px;font-size:14px;"></div>
                     </div>
 
                     <div class="backup-card">
-                        <h3>Importer des données</h3>
-                        <p>Restaure les données depuis un fichier JSON de sauvegarde. Attention : ça remplace les données actuelles.</p>
+                        <h3>Exporter les donnÃ©es</h3>
+                        <p>TÃ©lÃ©charge toutes les donnÃ©es (employÃ©s + timbrages) en fichier JSON. Garde ce fichier en sÃ©curitÃ©.</p>
+                        <button class="btn btn-primary" onclick="exportBackup()">TÃ©lÃ©charger la sauvegarde</button>
+                    </div>
+
+                    <div class="backup-card">
+                        <h3>Importer des donnÃ©es</h3>
+                        <p>Restaure les donnÃ©es depuis un fichier JSON de sauvegarde. Attention : Ã§a remplace les donnÃ©es actuelles.</p>
                         <input type="file" id="importFile" accept=".json" class="input-field" style="margin-bottom:10px;">
                         <button class="btn btn-danger" onclick="importBackup()">Restaurer la sauvegarde</button>
                     </div>
@@ -161,7 +180,9 @@
 
     <script src="app.js"></script>
     <script>
+        // ============================================
         // LOGIN
+        // ============================================
         function doLogin() {
             const pwd = document.getElementById('loginPwd').value;
             if (pwd === ADMIN_PASSWORD) {
@@ -173,7 +194,9 @@
             }
         }
 
+        // ============================================
         // TABS
+        // ============================================
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(b => {
                 b.classList.toggle('active', b.dataset.tab === tab);
@@ -184,9 +207,12 @@
             if (tab === 'today') loadDayData();
             if (tab === 'month') loadMonthData();
             if (tab === 'employees') loadEmployeesTab();
+            if (tab === 'backup') loadBackupTab();
         }
 
+        // ============================================
         // INIT
+        // ============================================
         async function initAdmin() {
             await GitSync.init();
             document.getElementById('dayFilter').value = todayStr();
@@ -207,7 +233,9 @@
             });
         }
 
+        // ============================================
         // TAB: AUJOURD'HUI
+        // ============================================
         function loadDayData() {
             const date = document.getElementById('dayFilter').value;
             if (!date) return;
@@ -222,7 +250,7 @@
             }
 
             timbrages.forEach(t => {
-                const isEntry = t.type === 'ENTRÉE';
+                const isEntry = t.type === 'ENTRÃE';
                 const tr = document.createElement('tr');
                 tr.innerHTML =
                     '<td>' + t.time + '</td>' +
@@ -233,226 +261,225 @@
             });
         }
 
-        function deleteTimbre(id) {
-            if (!confirm('Supprimer ce timbre?')) return;
-            Storage.deleteTimbre(id);
-            loadDayData();
-        }
+        function deleteTimbre(id
+HÂY
+XÛÛ\J	ÔÝ\[Y\ÙH[XOÉÊJH]\ÂÝÜYÙK[]U[XJY
+NÂØY^Q]J
+NÂB[Ý[ÛYX[X[[XJ
+HÂÛÛÝ[\YHØÝ[Y[Ù][[Y[RY
+	ÛX[X[[\	ÊK[YNÂÛÛÝ\HHØÝ[Y[Ù][[Y[RY
+	ÛX[X[\IÊK[YNÂÛÛÝ]HHØÝ[Y[Ù][[Y[RY
+	ÛX[X[]IÊK[YNÂÛÛÝ[YHHØÝ[Y[Ù][[Y[RY
+	ÛX[X[[YIÊK[YNÂY
+Y[\YY]H][YJHÂ[\
+	Ô[\\ÈÝ\È\ÈÚ[\ÉÊNÂ]\ÂBÛÛÝ[\HÝÜYÙKÙ][\ÞYYPRY
+[\Y
+NÂY
+Y[\
+H]\ÂÝÜYÙKY[XJ[\Y[\[YK\K]K[YJNÂØÝ[Y[Ù][[Y[RY
+	ÛX[X[[YIÊK[YHH	ÉÎÂØÝ[Y[Ù][[Y[RY
+	Ù^Q[\ÊK[YHH]NÂØY^Q]J
+NÂBËÈOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOBËÈPQSÕQSËÈOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOB][ÛÔÕ]HH×NÂ[Ý[ÛØY[Û]J
+HÂÛÛÝ[Û[YHHØÝ[Y[Ù][[Y[RY
+	Û[Û[\ÊK[YNÂY
+[[Û[YJH]\ÂÛÛÝ[XYÙ\ÈHÝÜYÙKÙ][XYÙ\ÐS[Û
+[Û[YJNÂÛÛÝÝ[[X\Q]HØÝ[Y[Ù][[Y[RY
+	Û[ÛÝ[[X\IÊNÂÛÛÝÙHHØÝ[Y[Ù][[Y[RY
+	Û[ÛXPÙIÊNÂÝ[[X\Q][\SH	ÉÎÂÙK[\SH	ÉÎÂ[ÛÔÕ]HH×NÂY
+[XYÙ\Ë[ÝOOH
+HÂÙK[\SH	ÏÛÛÜ[HHÛ\ÜÏH[\K\Ý]H]XÝ[[XHÙH[Ú\ÏÝÝÎÂ]\ÂBËÈÜØ[\Ù\\[\ÞpêH\]BÛÛÝQ[\ÞYYHHßNÂ[XYÙ\ËÜXXÚ
+OÂY
+XQ[\ÞYYVÝ[\ÞYYRYJHÂQ[\ÞYYVÝ[\ÞYYRYHHÈ[YN[\ÞYYS[YK^\ÎßHNÂBY
+XQ[\ÞYYVÝ[\ÞYYRYK^\ÖÝ]WJHÂQ[\ÞYYVÝ[\ÞYYRYK^\ÖÝ]WHH×NÂBQ[\ÞYYVÝ[\ÞYYRYK^\ÖÝ]WK\Ú
+
+NÂJNÂËÈY\\ÛBÛÛÝÛÜYHØXÝ[Y\ÊQ[\ÞYYJKÛÜ
 
-        function addManualTimbre() {
-            const empId = document.getElementById('manualEmp').value;
-            const type = document.getElementById('manualType').value;
-            const date = document.getElementById('manualDate').value;
-            const time = document.getElementById('manualTime').value;
+KHOVÌWK[YKØØ[PÛÛ\\JÌWK[YJJNÂÛÜYÜXXÚ
 
-            if (!empId || !date || !time) {
-                alert('Remplis tous les champs');
-                return;
-            }
+Ù[\Y[\JHOÂ]Ý[Ý\ÈHÂ]Ý[^\ÈHÂÛÛÝ]\ÈHØXÝÙ^\Ê[\^\ÊKÛÜ
 
-            const emp = Storage.getEmployeeById(empId);
-            if (!emp) return;
+NÂ]\ËÜXXÚ
+]HOÂÝ[^\ÊÊÎÂÛÛÝ^U[XYÙ\ÈH[\^\ÖÙ]WNÂËÈZ\\[°êYKÜÛÜYBÛÛÝZ\ÈH×NÂ]Ý\[[HH[Â^U[XYÙ\ËÜXXÚ
+OÂY
+\HOOH	ÑS°âQIÊHÂÝ\[[HHÂH[ÙHY
+\HOOH	ÔÓÔQIÈ	Ý\[[JHÂZ\Ë\Ú
+È[NÝ\[[K^]JNÂÝ[Ý\È
+ÏHØ[Ý[]RÝ\ÊÝ\[[K[YK[YK]JNÂÝ\[[HH[ÂBJNÂY
+Ý\[[JHÂZ\Ë\Ú
+È[NÝ\[[K^][JNÂBY
+Z\Ë[ÝOOH
+HÂZ\Ë\Ú
+È[N[^]^U[XYÙ\ÖÌHJNÂBZ\ËÜXXÚ
 
-            Storage.addTimbre(empId, emp.name, type, date, time);
+Z\Y
+HOÂÛÛÝ[U[YHHZ\[HÈZ\[K[YH	ËIÎÂÛÛÝ^][YHHZ\^]ÈZ\^][YH	Ê[ÛÝ\ÊIÎÂÛÛÝÝ\ÈH
+Z\[H	Z\^]
+BÈÜX]Ý\ÊØ[Ý[]RÝ\ÊZ\[K[YKZ\^][YK]JJB	ËIÎÂÛÛÝHØÝ[Y[ÜX]Q[[Y[
+	ÝÊNÂ[\SB	ÏÈ
+È
+YOOHÈ[\[YH	ÉÊH
+È	ÏÝÈ
+Â	ÏÈ
+È
+YOOHÈÜX]]Q\Ü^J]JH	ÉÊH
+È	ÏÝÈ
+Â	ÏÈ
+È[U[YH
+È	ÏÝÈ
+Â	ÏÈ
+È^][YH
+È	ÏÝÈ
+Â	ÏÈ
+ÈÝ\È
+È	ÏÝÎÂÙK\[Ú[
+NÂ[ÛÔÕ]K\Ú
+Â[\ÞYN[\[YK]N]K[YN[U[YKÛÜYN^][YK]\\ÎÝ\ÂJNÂJNÂJNÂËÈYÛHÝ[ÛÛÝÝ[HØÝ[Y[ÜX]Q[[Y[
+	ÝÊNÂÝ[Û\ÜÓ[YHH	ÜÝXÝ[\ÝÉÎÂÝ[[\SB	ÏÛÛÜ[HÝ[OH^X[YÛYÚÈÝ[	È
+È[\[YH
+È	ÏÝÈ
+Â	ÏÝÛÏÈ
+ÈÜX]Ý\ÊÝ[Ý\ÊH
+È	ÏÜÝÛÏÝÎÂÙK\[Ú[
+Ý[NÂËÈØ\H°ê\Ý[pêBÛÛÝØ\HØÝ[Y[ÜX]Q[[Y[
+	Ù]ÊNÂØ\Û\ÜÓ[YHH	ÜÝ[[X\KXØ\	ÎÂØ\[\SB	Ï]Û\ÜÏH[\[[YHÈ
+È[\[YH
+È	ÏÙ]È
+Â	Ï]Û\ÜÏH[\ZÝ\ÈÈ
+ÈÜX]Ý\ÊÝ[Ý\ÊH
+È	ÏÙ]È
+Â	Ï]Û\ÜÏH[\Y^\ÈÈ
+ÈÝ[^\È
+È	ÈÝ\È
+È
+Ý[^\ÈHÈ	ÜÉÈ	ÉÊH
+È	ÏÙ]ÎÂÝ[[X\Q]\[Ú[
+Ø\
+NÂJNÂB[Ý[Û^ÜÔÕ
+HÂY
+[ÛÔÕ]K[ÝOOH
+HÂ[\
+	ÐÚ\ÙH[[Ú\È	ØXÜ	ÊNÂ]\ÂBÛÛÝÛHH	×QQÎÂÛÛÝXY\ÈH	Ñ[\ÞpêNÑ]NÑ[°êYNÔÛÜYNÒ]\\×ÎÂÛÛÝÝÜÈH[ÛÔÕ]KX\
+O	ÈÈ
+È[\ÞYH
+È	ÈÈÈ
+È]H
+È	ÈÈÈ
+È[YH
+È	ÈÈÈ
+ÈÛÜYH
+È	ÈÈÈ
+È]\\È
+È	ÈÂ
+KÚ[	×ÊNÂÛÛÝØH]ÈØØÛH
+ÈXY\È
+ÈÝÜ×KÈ\N	Ý^ØÜÝØÚ\Ù]]]NÉÈJNÂÛÛÝ\HTÜX]SØXÝT
+ØNÂÛÛÝHHØÝ[Y[ÜX]Q[[Y[
+	ØIÊNÂKYH\ÂKÝÛØYH	ÜÚ[YÙWÉÈ
+ÈØÝ[Y[Ù][[Y[RY
+	Û[Û[\ÊK[YH
+È	ËÜÝÎÂKÛXÚÊ
+NÂT]ÚÙSØXÝT
+\
+NÂB[Ý[Û[[Û
 
-            document.getElementById('manualTime').value = '';
-            document.getElementById('dayFilter').value = date;
-            loadDayData();
-        }
+HÂØÝ[Y[Ù][[Y[RY
+	Ü[\[Ù	ÊK^ÛÛ[H	Ô0ê\[ÙH	È
+ÈØÝ[Y[Ù][[Y[RY
+	Û[Û[\ÊK[YNÂÚ[ÝË[
 
-        // TAB: MENSUEL
-        let monthCSVData = [];
+NÂBËÈOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOBËÈPSTÖpâTÂËÈOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOB[Ý[ÛØY[\ÞYY\ÕX
+HÂÛÛÝ[\ÞYY\ÈHÝÜYÙKÙ][\ÞYY\Ê
+NÂÛÛÝÙHHØÝ[Y[Ù][[Y[RY
+	Ù[\XPÙIÊNÂÙK[\SH	ÉÎÂY
+[\ÞYY\Ë[ÝOOH
+HÂÙK[\SH	ÏÛÛÜ[HÛ\ÜÏH[\K\Ý]H]XÝ[[\ÞpêH8 %ZÝ]KY[OÝÝÎÂ]\ÂB[\ÞYY\ËÜXXÚ
+[\OÂÛÛÝHØÝ[Y[ÜX]Q[[Y[
+	ÝÊNÂ[\SB	ÏÈ
+È[\[YH
+È	ÏÝÈ
+Â	ÏÛ\ÜÏHXÝ[ÛÈ]ÛÛ\ÜÏHY[Ù\\ÛX[ÛÛXÚÏH[]Q[\ÞYYJ	ÉÈ
+È[\Y
+È	×	Ë	ÉÈ
+È[\[YK\XÙJÉËÙË	ÈH
+È	×	ÊHÝ\[Y\Ø]ÛÝÎÂÙK\[Ú[
+NÂJNÂB[Ý[ÛY[\ÞYYJ
+HÂÛÛÝ[]HØÝ[Y[Ù][[Y[RY
+	Û]Ñ[\[YIÊNÂÛÛÝ[YHH[][YK[J
+NÂY
+[[YJHÂ[\
+	Ñ[H[ÛIÊNÂ]\ÂBÛÛÝ^\ÝÈHÝÜYÙKÙ][\ÞYY\Ê
+KÛÛYJHOK[YKÓÝÙ\Ø\ÙJ
+HOOH[YKÓÝÙ\Ø\ÙJ
+JNÂY
+^\ÝÊHÂ[\
+	ÐÙ][\ÞpêH^\ÝH0êZ°è	ÊNÂ]\ÂBÝÜYÙKY[\ÞYYJ[YJNÂ[][YHH	ÉÎÂ[]ØÝ\Ê
+NÂØY[\ÞYY\ÕX
+NÂÜ[]SX[X[[\Ù[XÝ
 
-        function loadMonthData() {
-            const monthValue = document.getElementById('monthFilter').value;
-            if (!monthValue) return;
+NÂB[Ý[Û[]Q[\ÞYYJY[YJHÂY
+XÛÛ\J	ÔÝ\[Y\	È
+È[YH
+È	ÏÈÙ\È[XYÙ\ÈÙ\ÛÛÛÙ\°ê\ËÊJH]\ÂÝÜYÙK[]Q[\ÞYYJY
+NÂØY[\ÞYY\ÕX
+NÂÜ[]SX[X[[\Ù[XÝ
 
-            const timbrages = Storage.getTimbragesByMonth(monthValue);
-            const summaryDiv = document.getElementById('monthSummary');
-            const tbody = document.getElementById('monthTableBody');
-            summaryDiv.innerHTML = '';
-            tbody.innerHTML = '';
-            monthCSVData = [];
+NÂBËÈOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOBËÈPÐUUQÐTBËÈOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOB[Ý[Û^ÜXÚÝ\
 
-            if (timbrages.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Aucun timbre ce mois</td></tr>';
-                return;
-            }
+HÂÛÛÝ]HHÝÜYÙK^Ü[
 
-            const byEmployee = {};
-            timbrages.forEach(t => {
-                if (!byEmployee[t.employeeId]) {
-                    byEmployee[t.employeeId] = { name: t.employeeName, days: {} };
-                }
-                if (!byEmployee[t.employeeId].days[t.date]) {
-                    byEmployee[t.employeeId].days[t.date] = [];
-                }
-                byEmployee[t.employeeId].days[t.date].push(t);
-            });
+NÂÛÛÝØH]ÈØÙ]WKÈ\N	Ø\XØ][ÛÚÛÛÈJNÂÛÛÝ\HTÜX]SØXÝT
+ØNÂÛÛÝHHØÝ[Y[ÜX]Q[[Y[
+	ØIÊNÂKYH\ÂKÝÛØYH	ÜÚ[YÙWØXÚÝ\ÉÈ
+ÈÙ^TÝ
+H
+È	ËÛÛÎÂKÛXÚÊ
+NÂT]ÚÙSØXÝT
+\
+NÂB[Ý[Û[\ÜXÚÝ\
 
-            const sorted = Object.entries(byEmployee).sort((a, b) => a[1].name.localeCompare(b[1].name));
+HÂÛÛÝ[R[]HØÝ[Y[Ù][[Y[RY
+	Ú[\Ü[IÊNÂY
+Y[R[][\Ë[Ý
+HÂ[\
+	Ôðê[XÝ[ÛH[XÚY\ÓÓÊNÂ]\ÂBY
+XÛÛ\J	Ð][[Û0éØHH[\XÙ\Ý]\È\ÈÛ°êY\ÈXÝY[\ËÛÛ[Y\ÉÊJH]\ÂÛÛÝXY\H]È[TXY\
+NÂXY\ÛØYH[Ý[ÛJHÂHÂÝÜYÙK[\Ü[
+K\Ù]\Ý[
+NÂ[\
+	ÑÛ°êY\È\Ý]\°êY\È]XÈÝXØðêÈIÊNÂ[]YZ[
+NÂHØ]Ú
+\HÂ[\
+	Ñ\]\XÚY\[[YIÊNÂBNÂXY\XY\Õ^
+[R[][\ÖÌJNÂBËÈ8¥ 8¥ Ú]XÚÙ[8¥ 8¥ [Ý[ÛØ]QÚ]ÚÙ[
+HÂÛÛÝ[]HØÝ[Y[Ù][[Y[RY
+	ÙÚ]XÚÙ[[]	ÊNÂÛÛÝÚÙ[H[][YK[J
+NÂÛÛÝÝ]\ÈHØÝ[Y[Ù][[Y[RY
+	ÙÚ]Ý]\ÉÊNÂY
+]ÚÙ[HÂÝ]\Ë[\SH	ÏÜ[Ý[OHÛÛÜÙMLÎLÍNÈ[H[ÚÙ[[YOÜÜ[ÎÂ]\ÂBÙ]Ú]XÚÙ[ÚÙ[NÂÝ]\Ë[\SH	ÏÜ[Ý[OHÛÛÜÍØLÎÈÚÙ[[YÚ\Ý°êH[ÈÙH]YØ]]\ÜÜ[ÎÂËÈ\Ý\]]ÛX]\]Y[Y[\°êÈ[YÚ\Ý[Y[\ÝÚ]Þ[Ê
+NÂB\Þ[È[Ý[Û\ÝÚ]Þ[Ê
+HÂÛÛÝÝ]\ÈHØÝ[Y[Ù][[Y[RY
+	ÙÚ]Ý]\ÉÊNÂÛÛÝÚÙ[HÙ]Ú]XÚÙ[
+NÂY
+]ÚÙ[HÂÝ]\Ë[\SH	ÏÜ[Ý[OHÛÛÜÙMLÎLÍNÈ]XÝ[ÚÙ[[YÚ\Ý°êH8 %[K[H	ØXÜÜÜ[ÎÂ]\ÂBÝ]\Ë[\SH	ÏÜ[Ý[OHÛÛÜÍQÍÎÈ\Ý[ÛÝ\ËÜÜ[ÎÂHÂÛÛÝ\ÜÛÙHH]ØZ]]Ú
+	ÚÎËØ\KÚ]XÛÛKÜ\ÜËÉÈ
+ÈÒUPÔTÈ
+È	ËØÛÛ[ËÙ]KÛÛËÂXY\ÎÂ	Ð]]Ü^][ÛÎ	ÐX\\	È
+ÈÚÙ[	ÐXØÙ\	Î	Ø\XØ][ÛÝÚ]XÊÚÛÛÂBB
+NÂY
+\ÜÛÙKÚÊHÂÝ]\Ë[\SH	ÏÜ[Ý[OHÛÛÜÍØLÎÈÛÛ^[ÛÒÈ8 %Þ[ÚÛ\Ø][ÛXÝ]OÜÜ[ÎÂËÈ[Ù\[Þ[ÈÛÛ\]]ØZ]Ú]Þ[Ë[]
 
-            sorted.forEach(([empId, emp]) => {
-                let totalHours = 0;
-                let totalDays = 0;
-                const dates = Object.keys(emp.days).sort();
+NÂH[ÙHY
+\ÜÛÙKÝ]\ÈOOHJHÂÝ]\Ë[\SH	ÏÜ[Ý[OHÛÛÜÙMLÎLÍNÈÚÙ[[[YHÝH°ê]Ü]pêOÜÜ[ÎÂH[ÙHY
+\ÜÛÙKÝ]\ÈOOH
+HÂÝ]\Ë[\SH	ÏÜ[Ý[OHÛÛÜÍØLÎÈÛÛ^[ÛÒÈ8 %[ZY\Þ[ÈÜ°êY\HHXÚY\ÜÜ[ÎÂ]ØZ]Ú]Þ[Ë[]
 
-                dates.forEach(date => {
-                    totalDays++;
-                    const dayTimbrages = emp.days[date];
-
-                    const pairs = [];
-                    let currentEntry = null;
-
-                    dayTimbrages.forEach(t => {
-                        if (t.type === 'ENTRÉE') {
-                            currentEntry = t;
-                        } else if (t.type === 'SORTIE' && currentEntry) {
-                            pairs.push({ entry: currentEntry, exit: t });
-                            totalHours += calculateHours(currentEntry.time, t.time, date);
-                            currentEntry = null;
-                        }
-                    });
-
-                    if (currentEntry) {
-                        pairs.push({ entry: currentEntry, exit: null });
-                    }
-
-                    if (pairs.length === 0) {
-                        pairs.push({ entry: null, exit: dayTimbrages[0] });
-                    }
-
-                    pairs.forEach((pair, idx) => {
-                        const entryTime = pair.entry ? pair.entry.time : '-';
-                        const exitTime = pair.exit ? pair.exit.time : '(en cours)';
-                        const hours = (pair.entry && pair.exit)
-                            ? formatHours(calculateHours(pair.entry.time, pair.exit.time, date))
-                            : '-';
-
-                        const tr = document.createElement('tr');
-                        tr.innerHTML =
-                            '<td>' + (idx === 0 ? emp.name : '') + '</td>' +
-                            '<td>' + (idx === 0 ? formatDateDisplay(date) : '') + '</td>' +
-                            '<td>' + entryTime + '</td>' +
-                            '<td>' + exitTime + '</td>' +
-                            '<td>' + hours + '</td>';
-                        tbody.appendChild(tr);
-
-                        monthCSVData.push({
-                            employe: emp.name, date: date,
-                            entree: entryTime, sortie: exitTime, heures: hours
-                        });
-                    });
-                });
-
-                const totalTr = document.createElement('tr');
-                totalTr.className = 'subtotal-row';
-                totalTr.innerHTML =
-                    '<td colspan="4" style="text-align:right;">Total ' + emp.name + '</td>' +
-                    '<td><strong>' + formatHours(totalHours) + '</strong></td>';
-                tbody.appendChild(totalTr);
-
-                const card = document.createElement('div');
-                card.className = 'summary-card';
-                card.innerHTML =
-                    '<div class="emp-name">' + emp.name + '</div>' +
-                    '<div class="emp-hours">' + formatHours(totalHours) + '</div>' +
-                    '<div class="emp-days">' + totalDays + ' jour' + (totalDays > 1 ? 's' : '') + '</div>';
-                summaryDiv.appendChild(card);
-            });
-        }
-
-        function exportCSV() {
-            if (monthCSVData.length === 0) { alert('Charge un mois d\'abord'); return; }
-            const bom = '\uFEFF';
-            const headers = 'Employé;Date;Entrée;Sortie;Heures\n';
-            const rows = monthCSVData.map(r =>
-                '"' + r.employe + '";"' + r.date + '";"' + r.entree + '";"' + r.sortie + '";"' + r.heures + '"'
-            ).join('\n');
-            const blob = new Blob([bom + headers + rows], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'pointage_' + document.getElementById('monthFilter').value + '.csv';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function printMonth() {
-            document.getElementById('printPeriod').textContent = 'Période : ' + document.getElementById('monthFilter').value;
-            window.print();
-        }
-
-        // TAB: EMPLOYÉS
-        function loadEmployeesTab() {
-            const employees = Storage.getEmployees();
-            const tbody = document.getElementById('empTableBody');
-            tbody.innerHTML = '';
-
-            if (employees.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="2" class="empty-state">Aucun employé \u2014 ajoute-en!</td></tr>';
-                return;
-            }
-
-            employees.forEach(emp => {
-                const tr = document.createElement('tr');
-                tr.innerHTML =
-                    '<td>' + emp.name + '</td>' +
-                    '<td class="actions"><button class="btn btn-danger btn-small" onclick="deleteEmployee(\'' + emp.id + '\', \'' + emp.name.replace(/'/g, "\\\\'") + '\')">Supprimer</button></td>';
-                tbody.appendChild(tr);
-            });
-        }
-
-        function addEmployee() {
-            const input = document.getElementById('newEmpName');
-            const name = input.value.trim();
-            if (!name) { alert('Entre un nom'); return; }
-            const exists = Storage.getEmployees().some(e => e.name.toLowerCase() === name.toLowerCase());
-            if (exists) { alert('Cet employé existe déjà'); return; }
-            Storage.addEmployee(name);
-            input.value = '';
-            input.focus();
-            loadEmployeesTab();
-            populateManualEmpSelect();
-        }
-
-        function deleteEmployee(id, name) {
-            if (!confirm('Supprimer ' + name + '? Ses timbrages seront conservés.')) return;
-            Storage.deleteEmployee(id);
-            loadEmployeesTab();
-            populateManualEmpSelect();
-        }
-
-        // TAB: SAUVEGARDE
-        function exportBackup() {
-            const data = Storage.exportAll();
-            const blob = new Blob([data], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'pointage_backup_' + todayStr() + '.json';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function importBackup() {
-            const fileInput = document.getElementById('importFile');
-            if (!fileInput.files.length) { alert('Sélectionne un fichier JSON'); return; }
-            if (!confirm('Attention : ça va remplacer toutes les données actuelles. Continuer?')) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    Storage.importAll(e.target.result);
-                    alert('Données restaurées avec succès!');
-                    initAdmin();
-                } catch (err) {
-                    alert('Erreur : fichier invalide');
-                }
-            };
-            reader.readAsText(fileInput.files[0]);
-        }
-
-        document.getElementById('loginPwd').focus();
-    </script>
-</body>
-</html>
+NÂH[ÙHÂÝ]\Ë[\SH	ÏÜ[Ý[OHÛÛÜÙMLÎLÍNÈ\]\	È
+È\ÜÛÙKÝ]\È
+È	ÏÜÜ[ÎÂBHØ]Ú
+\HÂÝ]\Ë[\SH	ÏÜ[Ý[OHÛÛÜÙMLÎLÍNÈ\]\°ê\ÙX]H8 %°ê\YYHHÛÛ^[ÛÜÜ[ÎÂBB[Ý[ÛØYXÚÝ\X
+HÂËÈ°êK\[\\HÚ[\ÚÙ[ÚH0êZ°è[YÚ\Ý°êBÛÛÝÚÙ[HÙ]Ú]XÚÙ[
+NÂY
+ÚÙ[HÂØÝ[Y[Ù][[Y[RY
+	ÙÚ]XÚÙ[[]	ÊK[YHHÚÙ[ÂBBËÈOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOBËÈSUËÈOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOBØÝ[Y[Ù][[Y[RY
+	ÛÙÚ[Ù	ÊKØÝ\Ê
+NÂÜØÜ\ØÙOÚ[
