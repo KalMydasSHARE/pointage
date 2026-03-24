@@ -19,15 +19,6 @@
   ],
   "timbrages": [
     {
-      "id": "t_1774375186301_c256",
-      "employeeId": "emp_1774308354765_8m70",
-      "employeeName": "Thomas",
-      "type": "ENTRÉE",
-      "date": "2026-03-24",
-      "time": "18:59",
-      "timestamp": "2026-03-24T18:59:00"
-    },
-    {
       "id": "t_1774375197733_sseb",
       "employeeId": "emp_1774308357090_qngz",
       "employeeName": "Rachel",
@@ -100,5 +91,5 @@
       "timestamp": "2026-03-24T19:00:00"
     }
   ],
-  "exportDate": "2026-03-24T18:01:09.578Z"
+  "exportDate": "2026-03-24T18:01:10.210Z"
 }
