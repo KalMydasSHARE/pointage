@@ -40,6 +40,7 @@
             <div class="tabs">
                 <button class="tab-btn active" data-tab="today" onclick="switchTab('today')">Aujourd'hui</button>
                 <button class="tab-btn" data-tab="month" onclick="switchTab('month')">Mensuel</button>
+                <button class="tab-btn" data-tab="balance" onclick="switchTab('balance')">Balance</button>
                 <button class="tab-btn" data-tab="employees" onclick="switchTab('employees')">Employés</button>
                 <button class="tab-btn" data-tab="backup" onclick="switchTab('backup')">Sauvegarde</button>
             </div>
@@ -106,20 +107,36 @@
                     <button class="btn btn-outline" onclick="printMonth()">Imprimer</button>
                 </div>
 
-                <div id="monthSummary" class="summary-cards"></div>
-
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Employé</th>
+                            <th>Employe</th>
                             <th>Date</th>
-                            <th>Entrée</th>
+                            <th>Entree</th>
                             <th>Sortie</th>
                             <th>Heures</th>
                         </tr>
                     </thead>
                     <tbody id="monthTableBody"></tbody>
                 </table>
+
+                <!-- Balance mensuelle par employe -->
+                <div id="monthBalanceSummary" style="margin-top:25px;"></div>
+            </div>
+
+            <!-- ============================== -->
+            <!-- TAB: BALANCE ANNUELLE          -->
+            <!-- ============================== -->
+            <div id="tab-balance" class="tab-panel">
+                <div class="controls-bar">
+                    <select id="balanceYear" class="input-field" onchange="loadBalanceData()"></select>
+                    <select id="balanceEmployee" class="input-field" onchange="loadBalanceData()">
+                        <option value="all">Tous les employes</option>
+                    </select>
+                    <button class="btn btn-outline" onclick="loadBalanceData()">Actualiser</button>
+                </div>
+
+                <div id="balanceContent"></div>
             </div>
 
             <!-- ============================== -->
@@ -128,7 +145,7 @@
             <div id="tab-employees" class="tab-panel">
                 <div class="controls-bar">
                     <input type="text" id="newEmpName" class="input-field"
-                           placeholder="Nom du nouvel employé"
+                           placeholder="Nom du nouvel employe"
                            onkeypress="if(event.key==='Enter') addEmployee()">
                     <button class="btn btn-success" onclick="addEmployee()">Ajouter</button>
                 </div>
@@ -137,11 +154,49 @@
                     <thead>
                         <tr>
                             <th>Nom</th>
+                            <th>% Travail</th>
+                            <th>Heures dues</th>
                             <th class="actions">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="empTableBody"></tbody>
                 </table>
+
+                <div class="contract-section" style="margin-top:25px;">
+                    <h3 style="color:var(--chocolate);margin-bottom:15px;">Pourcentage de travail par mois</h3>
+                    <p style="color:var(--text-muted);font-size:0.9em;margin-bottom:15px;">
+                        Base : 182h/mois = 100%. Modifie le pourcentage pour ajuster les heures dues.
+                    </p>
+                    <div class="form-row" style="margin-bottom:15px;">
+                        <div class="form-group">
+                            <label>Employe</label>
+                            <select id="contractEmp" class="input-field"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Mois</label>
+                            <input type="month" id="contractMonth" class="input-field">
+                        </div>
+                        <div class="form-group">
+                            <label>Pourcentage (%)</label>
+                            <input type="number" id="contractPct" class="input-field" min="0" max="100" value="100" step="5">
+                        </div>
+                        <div class="form-group" style="justify-content:flex-end;">
+                            <button class="btn btn-success" onclick="saveContract()">Enregistrer</button>
+                        </div>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Employe</th>
+                                <th>Mois</th>
+                                <th>%</th>
+                                <th>Heures dues</th>
+                                <th class="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contractTableBody"></tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- ============================== -->
@@ -206,6 +261,7 @@
 
             if (tab === 'today') loadDayData();
             if (tab === 'month') loadMonthData();
+            if (tab === 'balance') loadBalanceData();
             if (tab === 'employees') loadEmployeesTab();
             if (tab === 'backup') loadBackupTab();
         }
@@ -218,7 +274,10 @@
             document.getElementById('dayFilter').value = todayStr();
             document.getElementById('monthFilter').value = currentMonthStr();
             document.getElementById('manualDate').value = todayStr();
+            document.getElementById('contractMonth').value = currentMonthStr();
             populateManualEmpSelect();
+            populateContractEmpSelect();
+            populateBalanceSelects();
             loadDayData();
         }
 
@@ -298,10 +357,10 @@
             if (!monthValue) return;
 
             const timbrages = Storage.getTimbragesByMonth(monthValue);
-            const summaryDiv = document.getElementById('monthSummary');
             const tbody = document.getElementById('monthTableBody');
-            summaryDiv.innerHTML = '';
+            const balanceSummary = document.getElementById('monthBalanceSummary');
             tbody.innerHTML = '';
+            balanceSummary.innerHTML = '';
             monthCSVData = [];
 
             if (timbrages.length === 0) {
@@ -309,7 +368,7 @@
                 return;
             }
 
-            // Organiser par employé > par date
+            // Organiser par employe > par date
             const byEmployee = {};
             timbrages.forEach(t => {
                 if (!byEmployee[t.employeeId]) {
@@ -324,6 +383,9 @@
             // Trier par nom
             const sorted = Object.entries(byEmployee).sort((a, b) => a[1].name.localeCompare(b[1].name));
 
+            // Construire le tableau de balance pour afficher en bas
+            const balanceRows = [];
+
             sorted.forEach(([empId, emp]) => {
                 let totalHours = 0;
                 let totalDays = 0;
@@ -333,7 +395,7 @@
                     totalDays++;
                     const dayTimbrages = emp.days[date];
 
-                    // Pairer entrée/sortie
+                    // Pairer entree/sortie
                     const pairs = [];
                     let currentEntry = null;
 
@@ -378,23 +440,52 @@
                     });
                 });
 
-                // Ligne total
+                // Ligne total + balance
+                const pct = Storage.getContract(empId, monthValue);
+                const target = CONTRACT_BASE_HOURS * (pct / 100);
+                const balance = totalHours - target;
+
                 const totalTr = document.createElement('tr');
                 totalTr.className = 'subtotal-row';
                 totalTr.innerHTML =
-                    '<td colspan="4" style="text-align:right;">Total ' + emp.name + '</td>' +
+                    '<td colspan="3" style="text-align:right;"><strong>Total ' + emp.name + '</strong> (' + pct + '% = ' + formatHours(target) + ' dues)</td>' +
+                    '<td style="text-align:right;">Travaille :</td>' +
                     '<td><strong>' + formatHours(totalHours) + '</strong></td>';
                 tbody.appendChild(totalTr);
 
-                // Carte résumé
-                const card = document.createElement('div');
-                card.className = 'summary-card';
-                card.innerHTML =
-                    '<div class="emp-name">' + emp.name + '</div>' +
-                    '<div class="emp-hours">' + formatHours(totalHours) + '</div>' +
-                    '<div class="emp-days">' + totalDays + ' jour' + (totalDays > 1 ? 's' : '') + '</div>';
-                summaryDiv.appendChild(card);
+                // Ligne balance
+                const balanceTr = document.createElement('tr');
+                const balanceClass = balance >= 0 ? 'balance-positive' : 'balance-negative';
+                balanceTr.className = 'subtotal-row';
+                balanceTr.innerHTML =
+                    '<td colspan="4" style="text-align:right;">Balance :</td>' +
+                    '<td><strong class="' + balanceClass + '">' + formatBalance(balance) + '</strong></td>';
+                tbody.appendChild(balanceTr);
+
+                // Separator
+                const sepTr = document.createElement('tr');
+                sepTr.innerHTML = '<td colspan="5" style="padding:4px;border:none;"></td>';
+                tbody.appendChild(sepTr);
+
+                balanceRows.push({ name: emp.name, empId, totalHours, totalDays, pct, target, balance });
             });
+
+            // Afficher un resume balance en bas
+            if (balanceRows.length > 0) {
+                let html = '<h3 style="color:var(--chocolate);margin-bottom:12px;">Resume balance — ' + monthNameFr(monthValue) + '</h3>';
+                html += '<div class="summary-cards">';
+                balanceRows.forEach(r => {
+                    const cls = r.balance >= 0 ? 'balance-positive' : 'balance-negative';
+                    html += '<div class="summary-card">' +
+                        '<div class="emp-name">' + r.name + ' (' + r.pct + '%)</div>' +
+                        '<div class="emp-hours">' + formatHours(r.totalHours) + ' / ' + formatHours(r.target) + '</div>' +
+                        '<div class="emp-days">' + r.totalDays + ' jour' + (r.totalDays > 1 ? 's' : '') + '</div>' +
+                        '<div class="balance-badge ' + cls + '" style="margin-top:8px;font-size:1.1em;font-weight:700;">' + formatBalance(r.balance) + '</div>' +
+                        '</div>';
+                });
+                html += '</div>';
+                balanceSummary.innerHTML = html;
+            }
         }
 
         function exportCSV() {
@@ -430,19 +521,28 @@
             const employees = Storage.getEmployees();
             const tbody = document.getElementById('empTableBody');
             tbody.innerHTML = '';
+            const currentMonth = currentMonthStr();
 
             if (employees.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="2" class="empty-state">Aucun employé — ajoute-en!</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Aucun employe — ajoute-en!</td></tr>';
                 return;
             }
 
             employees.forEach(emp => {
+                const pct = Storage.getContract(emp.id, currentMonth);
+                const target = CONTRACT_BASE_HOURS * (pct / 100);
                 const tr = document.createElement('tr');
                 tr.innerHTML =
                     '<td>' + emp.name + '</td>' +
+                    '<td><strong>' + pct + '%</strong></td>' +
+                    '<td>' + formatHours(target) + '</td>' +
                     '<td class="actions"><button class="btn btn-danger btn-small" onclick="deleteEmployee(\'' + emp.id + '\', \'' + emp.name.replace(/'/g, "\\'") + '\')">Supprimer</button></td>';
                 tbody.appendChild(tr);
             });
+
+            // Charger aussi le tableau des contrats
+            loadContractsTable();
+            populateContractEmpSelect();
         }
 
         function addEmployee() {
@@ -508,6 +608,166 @@
                 }
             };
             reader.readAsText(fileInput.files[0]);
+        }
+
+        // ============================================
+        // CONTRATS (pourcentage de travail)
+        // ============================================
+        function populateContractEmpSelect() {
+            const sel = document.getElementById('contractEmp');
+            if (!sel) return;
+            sel.innerHTML = '';
+            Storage.getEmployees().forEach(e => {
+                const opt = document.createElement('option');
+                opt.value = e.id;
+                opt.textContent = e.name;
+                sel.appendChild(opt);
+            });
+        }
+
+        function saveContract() {
+            const empId = document.getElementById('contractEmp').value;
+            const yearMonth = document.getElementById('contractMonth').value;
+            const pct = parseInt(document.getElementById('contractPct').value);
+
+            if (!empId || !yearMonth) {
+                alert('Remplis tous les champs');
+                return;
+            }
+            if (isNaN(pct) || pct < 0 || pct > 100) {
+                alert('Le pourcentage doit etre entre 0 et 100');
+                return;
+            }
+
+            Storage.setContract(empId, yearMonth, pct);
+            loadContractsTable();
+            loadEmployeesTab();
+        }
+
+        function loadContractsTable() {
+            const tbody = document.getElementById('contractTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const contracts = Storage.getContracts();
+            const employees = Storage.getEmployees();
+
+            if (contracts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Aucun contrat configure — tous les employes sont a 100% (182h) par defaut</td></tr>';
+                return;
+            }
+
+            // Trier par mois desc puis par nom
+            const sorted = [...contracts].sort((a, b) => {
+                if (b.yearMonth !== a.yearMonth) return b.yearMonth.localeCompare(a.yearMonth);
+                return a.employeeId.localeCompare(b.employeeId);
+            });
+
+            sorted.forEach(c => {
+                const emp = employees.find(e => e.id === c.employeeId);
+                const empName = emp ? emp.name : '(supprime)';
+                const target = CONTRACT_BASE_HOURS * (c.percentage / 100);
+                const tr = document.createElement('tr');
+                tr.innerHTML =
+                    '<td>' + empName + '</td>' +
+                    '<td>' + monthNameFr(c.yearMonth) + '</td>' +
+                    '<td><strong>' + c.percentage + '%</strong></td>' +
+                    '<td>' + formatHours(target) + '</td>' +
+                    '<td class="actions"><button class="btn btn-danger btn-small" onclick="deleteContract(\'' + c.employeeId + '\', \'' + c.yearMonth + '\')">Supprimer</button></td>';
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteContract(empId, yearMonth) {
+            if (!confirm('Remettre cet employe a 100% pour ce mois?')) return;
+            const contracts = Storage.getContracts().filter(c => !(c.employeeId === empId && c.yearMonth === yearMonth));
+            Storage.saveContracts(contracts);
+            loadContractsTable();
+            loadEmployeesTab();
+        }
+
+        // ============================================
+        // TAB: BALANCE ANNUELLE
+        // ============================================
+        function populateBalanceSelects() {
+            // Annee
+            const yearSel = document.getElementById('balanceYear');
+            if (!yearSel) return;
+            const currentYear = new Date().getFullYear();
+            yearSel.innerHTML = '';
+            for (let y = currentYear; y >= currentYear - 2; y--) {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                yearSel.appendChild(opt);
+            }
+
+            // Employes
+            const empSel = document.getElementById('balanceEmployee');
+            empSel.innerHTML = '<option value="all">Tous les employes</option>';
+            Storage.getEmployees().forEach(e => {
+                const opt = document.createElement('option');
+                opt.value = e.id;
+                opt.textContent = e.name;
+                empSel.appendChild(opt);
+            });
+        }
+
+        function loadBalanceData() {
+            const year = document.getElementById('balanceYear').value;
+            const empFilter = document.getElementById('balanceEmployee').value;
+            const container = document.getElementById('balanceContent');
+            container.innerHTML = '';
+
+            const employees = Storage.getEmployees();
+            const empsToShow = empFilter === 'all' ? employees : employees.filter(e => e.id === empFilter);
+
+            if (empsToShow.length === 0) {
+                container.innerHTML = '<div class="empty-state">Aucun employe</div>';
+                return;
+            }
+
+            empsToShow.forEach(emp => {
+                const yearData = getYearBalance(emp.id, parseInt(year));
+
+                let html = '<div class="balance-employee-card">';
+                html += '<h3 style="color:var(--chocolate);margin-bottom:12px;">' + emp.name + ' — ' + year + '</h3>';
+
+                if (yearData.monthDetails.length === 0) {
+                    html += '<div class="empty-state">Aucune donnee pour cette annee</div>';
+                } else {
+                    html += '<table class="data-table"><thead><tr>';
+                    html += '<th>Mois</th><th>%</th><th>Heures dues</th><th>Heures travaillees</th><th>Balance mois</th><th>Cumul</th>';
+                    html += '</tr></thead><tbody>';
+
+                    yearData.monthDetails.forEach(md => {
+                        const pct = Storage.getContract(emp.id, md.yearMonth);
+                        const balCls = md.balance >= 0 ? 'balance-positive' : 'balance-negative';
+                        const cumCls = md.cumBalance >= 0 ? 'balance-positive' : 'balance-negative';
+                        const hasData = md.worked > 0 || md.target > 0;
+
+                        html += '<tr' + (hasData ? '' : ' style="opacity:0.5;"') + '>';
+                        html += '<td>' + monthNameFr(md.yearMonth) + '</td>';
+                        html += '<td>' + pct + '%</td>';
+                        html += '<td>' + formatHours(md.target) + '</td>';
+                        html += '<td>' + (md.worked > 0 ? formatHours(md.worked) : '-') + '</td>';
+                        html += '<td><strong class="' + balCls + '">' + formatBalance(md.balance) + '</strong></td>';
+                        html += '<td><strong class="' + cumCls + '">' + formatBalance(md.cumBalance) + '</strong></td>';
+                        html += '</tr>';
+                    });
+
+                    html += '</tbody></table>';
+
+                    // Resume annuel
+                    const cumCls = yearData.cumBalance >= 0 ? 'balance-positive' : 'balance-negative';
+                    html += '<div class="balance-total ' + cumCls + '" style="margin-top:12px;padding:14px 20px;border-radius:10px;text-align:center;font-size:1.1em;">';
+                    html += '<strong>Balance cumulative ' + year + ' : ' + formatBalance(yearData.cumBalance) + '</strong>';
+                    html += '</div>';
+                }
+
+                html += '</div>';
+                container.innerHTML += html;
+            });
         }
 
         // ── GitHub Token ──

@@ -45,6 +45,11 @@
                     </div>
                     <div id="todayTotal" class="today-total" style="display:none;"></div>
                 </div>
+
+                <!-- Balance mensuelle -->
+                <div id="empBalance" class="emp-balance-section" style="display:none;">
+                    <div id="empBalanceContent"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -173,6 +178,44 @@
             } else {
                 todayTotal.style.display = 'none';
             }
+
+            // Afficher la balance mensuelle
+            refreshBalance();
+        }
+
+        function refreshBalance() {
+            const balanceSection = document.getElementById('empBalance');
+            const balanceContent = document.getElementById('empBalanceContent');
+            if (!selectedEmpId) {
+                balanceSection.style.display = 'none';
+                return;
+            }
+
+            const ym = currentMonthStr();
+            const worked = getWorkedHoursForMonth(selectedEmpId, ym);
+            const pct = Storage.getContract(selectedEmpId, ym);
+            const target = CONTRACT_BASE_HOURS * (pct / 100);
+            const balance = worked - target;
+            const balCls = balance >= 0 ? 'balance-positive' : 'balance-negative';
+
+            // Cumul annuel
+            const year = new Date().getFullYear();
+            const yearData = getYearBalance(selectedEmpId, year);
+            const cumCls = yearData.cumBalance >= 0 ? 'balance-positive' : 'balance-negative';
+
+            balanceContent.innerHTML =
+                '<div class="balance-row">' +
+                    '<span>Ce mois (' + pct + '%) :</span>' +
+                    '<span>' + formatHours(worked) + ' / ' + formatHours(target) + '</span>' +
+                    '<strong class="' + balCls + '">' + formatBalance(balance) + '</strong>' +
+                '</div>' +
+                '<div class="balance-row">' +
+                    '<span>Cumul ' + year + ' :</span>' +
+                    '<span></span>' +
+                    '<strong class="' + cumCls + '">' + formatBalance(yearData.cumBalance) + '</strong>' +
+                '</div>';
+
+            balanceSection.style.display = 'block';
         }
 
         // ── Cliquer sur TIMBRER ──

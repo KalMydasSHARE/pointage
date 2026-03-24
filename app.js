@@ -102,11 +102,47 @@ const Storage = {
             .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
     },
 
+    // ── Contrats (pourcentage de travail) ──
+    getContracts() {
+        return JSON.parse(localStorage.getItem('pointage_contracts') || '[]');
+    },
+
+    saveContracts(contracts) {
+        localStorage.setItem('pointage_contracts', JSON.stringify(contracts));
+        GitSync.push();
+    },
+
+    // Définir le % de travail d'un employé pour un mois donné (yearMonth = "2026-03")
+    setContract(employeeId, yearMonth, percentage) {
+        const contracts = this.getContracts();
+        const idx = contracts.findIndex(c => c.employeeId === employeeId && c.yearMonth === yearMonth);
+        if (idx >= 0) {
+            contracts[idx].percentage = percentage;
+        } else {
+            contracts.push({ employeeId, yearMonth, percentage });
+        }
+        localStorage.setItem('pointage_contracts', JSON.stringify(contracts));
+        GitSync.push();
+    },
+
+    // Récupérer le % de travail d'un employé pour un mois (défaut: 100%)
+    getContract(employeeId, yearMonth) {
+        const contracts = this.getContracts();
+        const found = contracts.find(c => c.employeeId === employeeId && c.yearMonth === yearMonth);
+        return found ? found.percentage : 100;
+    },
+
+    // Récupérer tous les contrats d'un employé (pour vue annuelle)
+    getContractsByEmployee(employeeId) {
+        return this.getContracts().filter(c => c.employeeId === employeeId);
+    },
+
     // ── Export / Import ──
     exportAll() {
         return JSON.stringify({
             employees: this.getEmployees(),
             timbrages: this.getTimbrages(),
+            contracts: this.getContracts(),
             exportDate: new Date().toISOString()
         }, null, 2);
     },
@@ -115,6 +151,7 @@ const Storage = {
         const data = JSON.parse(jsonString);
         if (data.employees) localStorage.setItem('pointage_employees', JSON.stringify(data.employees));
         if (data.timbrages) localStorage.setItem('pointage_timbrages', JSON.stringify(data.timbrages));
+        if (data.contracts) localStorage.setItem('pointage_contracts', JSON.stringify(data.contracts));
     }
 };
 
@@ -333,6 +370,91 @@ function formatDateDisplay(dateStr) {
     const parts = dateStr.split('-');
     const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
     return days[d.getDay()] + ' ' + parts[2] + '/' + parts[1];
+}
+
+// ============================================
+// CALCUL HEURES CONTRACTUELLES
+// ============================================
+const CONTRACT_BASE_HOURS = 182; // heures pour 100%
+
+// Heures dues pour un mois selon le pourcentage de travail
+function getTargetHours(employeeId, yearMonth) {
+    const pct = Storage.getContract(employeeId, yearMonth);
+    return CONTRACT_BASE_HOURS * (pct / 100);
+}
+
+// Balance = heures travaillées - heures dues
+function calculateMonthBalance(workedHours, employeeId, yearMonth) {
+    const target = getTargetHours(employeeId, yearMonth);
+    return workedHours - target;
+}
+
+// Formater la balance avec signe + ou -
+function formatBalance(balance) {
+    const sign = balance >= 0 ? '+' : '';
+    const h = Math.floor(Math.abs(balance));
+    const m = Math.round((Math.abs(balance) - h) * 60);
+    return sign + (balance < 0 ? '-' : '') + h + 'h ' + String(m).padStart(2, '0') + 'min';
+}
+
+// Calculer les heures travaillées pour un employé sur un mois
+function getWorkedHoursForMonth(employeeId, yearMonth) {
+    const timbrages = Storage.getTimbragesByMonth(yearMonth)
+        .filter(t => t.employeeId === employeeId);
+
+    // Grouper par date
+    const byDate = {};
+    timbrages.forEach(t => {
+        if (!byDate[t.date]) byDate[t.date] = [];
+        byDate[t.date].push(t);
+    });
+
+    let totalHours = 0;
+    Object.keys(byDate).forEach(date => {
+        const dayTimbrages = byDate[date];
+        let currentEntry = null;
+        dayTimbrages.forEach(t => {
+            if (t.type === 'ENTRÉE') {
+                currentEntry = t;
+            } else if (t.type === 'SORTIE' && currentEntry) {
+                totalHours += calculateHours(currentEntry.time, t.time, date);
+                currentEntry = null;
+            }
+        });
+    });
+
+    return totalHours;
+}
+
+// Calculer la balance annuelle cumulée (tous les mois de l'année)
+function getYearBalance(employeeId, year) {
+    let cumBalance = 0;
+    const monthDetails = [];
+
+    for (let m = 1; m <= 12; m++) {
+        const ym = year + '-' + String(m).padStart(2, '0');
+        const worked = getWorkedHoursForMonth(employeeId, ym);
+        const target = getTargetHours(employeeId, ym);
+        const balance = worked - target;
+
+        // Ne compter que les mois passés ou en cours
+        const now = new Date();
+        const monthDate = new Date(year, m - 1, 1);
+        if (monthDate <= now) {
+            cumBalance += balance;
+            monthDetails.push({ yearMonth: ym, worked, target, balance, cumBalance });
+        }
+    }
+
+    return { cumBalance, monthDetails };
+}
+
+// Nom du mois en français
+function monthNameFr(yearMonth) {
+    const mois = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+                  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    const parts = yearMonth.split('-');
+    return mois[parseInt(parts[1]) - 1] + ' ' + parts[0];
 }
 
 console.log('Pointage chargé');

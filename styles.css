@@ -439,6 +439,65 @@ body {
 /* Today total */
 .today-total { background: var(--chocolate); color: var(--cream); padding: 12px 16px; border-radius: 8px; text-align: center; font-weight: 700; margin-top: 12px; font-size: 1.05em; }
 
+/* Balance styles */
+.balance-positive { color: #2E7D32; }
+.balance-negative { color: #C62828; }
+
+.emp-balance-section {
+    margin-top: 20px;
+    background: var(--cream);
+    border-radius: 10px;
+    padding: 16px 20px;
+    border-left: 4px solid var(--caramel-dark);
+}
+
+.balance-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 0.95em;
+    gap: 10px;
+}
+
+.balance-row:not(:last-child) {
+    border-bottom: 1px solid var(--border);
+}
+
+.balance-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-weight: 700;
+}
+
+.balance-badge.balance-positive { background: rgba(46, 125, 50, 0.1); }
+.balance-badge.balance-negative { background: rgba(198, 40, 40, 0.1); }
+
+.balance-total {
+    font-weight: 700;
+}
+
+.balance-total.balance-positive { background: rgba(46, 125, 50, 0.1); color: #2E7D32; }
+.balance-total.balance-negative { background: rgba(198, 40, 40, 0.1); color: #C62828; }
+
+/* Balance employee card */
+.balance-employee-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 25px;
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+}
+
+/* Contract section */
+.contract-section {
+    background: var(--cream);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px dashed var(--border);
+}
+
 /* Backup section */
 .backup-section { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .backup-card { background: var(--white); border-radius: 12px; padding: 25px; border: 1px solid var(--border); }
