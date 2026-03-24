@@ -53,7 +53,16 @@
       "date": "2026-03-23",
       "time": "23:00",
       "timestamp": "2026-03-23T23:00:00"
+    },
+    {
+      "id": "t_1774375411100_kzpp",
+      "employeeId": "emp_1774308357090_qngz",
+      "employeeName": "Rachel",
+      "type": "ENTRÉE",
+      "date": "2026-03-23",
+      "time": "23:02",
+      "timestamp": "2026-03-23T23:02:00"
     }
   ],
-  "exportDate": "2026-03-24T18:03:14.923Z"
+  "exportDate": "2026-03-24T18:03:31.100Z"
 }
