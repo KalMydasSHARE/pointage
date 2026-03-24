@@ -7,19 +7,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- LOGIN ACCÈS -->
-    <div class="login-overlay" id="accessOverlay">
-        <div class="login-box">
-            <h2>Pointage</h2>
-            <p>Mot de passe d'accès</p>
-            <input type="password" id="accessPwd" placeholder="Mot de passe" autocomplete="current-password"
-                   onkeypress="if(event.key==='Enter') doAccess()">
-            <div class="login-error" id="accessErr"></div>
-            <button class="btn btn-primary" style="width:100%;padding:14px;" onclick="doAccess()">Entrer</button>
-        </div>
-    </div>
-
-    <div class="page-wrapper" id="mainPage" style="display:none;">
+    <div class="page-wrapper">
         <div class="top-bar">
             <h1>Pointage</h1>
             <div class="top-bar-right">
@@ -63,18 +51,6 @@
 
     <script src="app.js"></script>
     <script>
-        // Vérifier accès
-        function doAccess() {
-            const pwd = document.getElementById('accessPwd').value;
-            if (pwd === ACCESS_PASSWORD) {
-                document.getElementById('accessOverlay').style.display = 'none';
-                document.getElementById('mainPage').style.display = 'flex';
-                initPointage();
-            } else {
-                document.getElementById('accessErr').textContent = 'Mot de passe incorrect';
-            }
-        }
-
         const empSelect = document.getElementById('empSelect');
         const timbrBtn = document.getElementById('timbrBtn');
         const statusMain = document.getElementById('statusMain');
@@ -83,25 +59,30 @@
         const todayTotal = document.getElementById('todayTotal');
 
         let selectedEmpId = null;
-        let nextType = null;
+        let nextType = 'ENTRÉE';  // ✅ Initialisée correctement
 
+        // ── Charger les employés ──
         function loadEmployees() {
             const employees = Storage.getEmployees();
             empSelect.innerHTML = '<option value="">-- Choisis ton nom --</option>';
+
             employees.forEach(emp => {
                 const opt = document.createElement('option');
                 opt.value = emp.id;
                 opt.textContent = emp.name;
                 empSelect.appendChild(opt);
             });
+
             if (employees.length === 0) {
                 statusMain.textContent = 'Aucun employé configuré';
                 statusSub.textContent = 'Le gestionnaire doit ajouter les employés (page Admin)';
             }
         }
 
+        // ── Sélection d'un employé ──
         empSelect.addEventListener('change', () => {
             selectedEmpId = empSelect.value;
+
             if (!selectedEmpId) {
                 timbrBtn.disabled = true;
                 timbrBtn.className = 'timbrer-btn';
@@ -112,40 +93,60 @@
                 todayTotal.style.display = 'none';
                 return;
             }
+
             refreshStatus();
             refreshToday();
         });
 
+        // ── Rafraîchir le statut ──
         function refreshStatus() {
             if (!selectedEmpId) return;
+
             const last = Storage.getLastTimbre(selectedEmpId);
             const empName = empSelect.options[empSelect.selectedIndex].text;
-            if (!last || last.type === 'SORTIE') {
+
+            // ✅ FIX: Vérifier que last.type est bien défini et faire la bonne affectation
+            const lastType = last ? (last.type || '') : '';
+
+            if (!last || lastType === 'SORTIE') {
                 nextType = 'ENTRÉE';
                 timbrBtn.textContent = 'ENTRÉE';
                 timbrBtn.className = 'timbrer-btn';
-                statusMain.textContent = empName + ' \u2014 prochaine action : ENTRÉE';
+                statusMain.textContent = empName + ' — prochaine action : ENTRÉE';
                 statusSub.textContent = last ? 'Dernière sortie : ' + last.time : 'Aucun timbre enregistré';
-            } else {
+            } else if (lastType === 'ENTRÉE') {
                 nextType = 'SORTIE';
                 timbrBtn.textContent = 'SORTIE';
                 timbrBtn.className = 'timbrer-btn is-sortie';
-                statusMain.textContent = empName + ' \u2014 prochaine action : SORTIE';
+                statusMain.textContent = empName + ' — prochaine action : SORTIE';
                 statusSub.textContent = 'Entré(e) à ' + last.time;
+            } else {
+                // ✅ Cas par défaut: quelque chose ne va pas, réinitialiser à ENTRÉE
+                nextType = 'ENTRÉE';
+                timbrBtn.textContent = 'ENTRÉE';
+                timbrBtn.className = 'timbrer-btn';
+                statusMain.textContent = empName + ' — prochaine action : ENTRÉE';
+                statusSub.textContent = 'État indéfini (erreur)';
             }
+
             timbrBtn.disabled = false;
         }
 
+        // ── Rafraîchir les timbrages du jour ──
         function refreshToday() {
             if (!selectedEmpId) return;
+
             const today = todayStr();
             const timbrages = Storage.getTimbragesByEmpAndDate(selectedEmpId, today);
+
             todayTimings.innerHTML = '';
+
             if (timbrages.length === 0) {
                 todayTimings.innerHTML = '<div class="empty-state">Aucun timbre aujourd\'hui</div>';
                 todayTotal.style.display = 'none';
                 return;
             }
+
             timbrages.forEach(t => {
                 const isEntry = t.type === 'ENTRÉE';
                 const row = document.createElement('div');
@@ -156,6 +157,8 @@
                     '<span class="type">' + t.type + '</span>';
                 todayTimings.appendChild(row);
             });
+
+            // Calculer total d'heures
             let totalH = 0;
             for (let i = 0; i < timbrages.length; i += 2) {
                 if (timbrages[i] && timbrages[i + 1] &&
@@ -163,6 +166,7 @@
                     totalH += calculateHours(timbrages[i].time, timbrages[i + 1].time, today);
                 }
             }
+
             if (totalH > 0) {
                 todayTotal.textContent = 'Total aujourd\'hui : ' + formatHours(totalH);
                 todayTotal.style.display = 'block';
@@ -171,31 +175,51 @@
             }
         }
 
+        // ── Cliquer sur TIMBRER ──
         timbrBtn.addEventListener('click', () => {
             if (!selectedEmpId || !nextType) return;
+
             timbrBtn.disabled = true;
             const empName = empSelect.options[empSelect.selectedIndex].text;
+            const now = new Date();
             const date = todayStr();
             const time = nowTimeStr();
+
+            // ✅ Sauvegarder le timbre
             Storage.addTimbre(selectedEmpId, empName, nextType, date, time);
-            const savedType = nextType;
+
+            // ✅ Pré-calculer le prochain type IMMÉDIATEMENT
+            const justRegisteredType = nextType;
+            const nextTypeAfterClick = (justRegisteredType === 'ENTRÉE') ? 'SORTIE' : 'ENTRÉE';
+
+            // Flash vert
             timbrBtn.className = 'timbrer-btn flash-success';
-            timbrBtn.textContent = savedType + ' OK';
-            statusMain.textContent = savedType + ' enregistrée pour ' + empName;
+            timbrBtn.textContent = justRegisteredType + ' OK';
+            statusMain.textContent = justRegisteredType + ' enregistrée pour ' + empName;
+
+            // Rafraîchir après 1.5s (avec vérification supplémentaire)
             setTimeout(() => {
                 refreshStatus();
                 refreshToday();
+
+                // ✅ Force le bouton au bon état si refreshStatus ne l'a pas bien fait
+                if (nextType !== nextTypeAfterClick) {
+                    console.warn('⚠️ Correction force du bouton:', nextType, '→', nextTypeAfterClick);
+                    nextType = nextTypeAfterClick;
+                    timbrBtn.textContent = nextType;
+                    timbrBtn.className = (nextType === 'SORTIE') ? 'timbrer-btn is-sortie' : 'timbrer-btn';
+                }
             }, 1500);
         });
 
-        async function initPointage() {
+        // ── Init ──
+        async function init() {
             const updated = await GitSync.init();
             loadEmployees();
+            // Si les données ont été mises à jour depuis GitHub, re-charger
             if (updated) loadEmployees();
         }
-
-        // Focus sur le champ mot de passe
-        document.getElementById('accessPwd').focus();
+        init();
     </script>
 </body>
 </html>
