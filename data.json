@@ -133,6 +133,11 @@
       "percentage": 60
     }
   ],
-  "holidays": [],
-  "exportDate": "2026-03-24T23:16:06.806Z"
+  "holidays": [
+    {
+      "date": "2026-08-01",
+      "name": "Fête nationale"
+    }
+  ],
+  "exportDate": "2026-03-24T23:21:37.457Z"
 }
