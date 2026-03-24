@@ -17,6 +17,16 @@
       "name": "Rachel"
     }
   ],
-  "timbrages": [],
-  "exportDate": "2026-03-24T18:05:58.798Z"
+  "timbrages": [
+    {
+      "id": "t_1774375569754_8s4x",
+      "employeeId": "emp_1774308357090_qngz",
+      "employeeName": "Rachel",
+      "type": "ENTRÉE",
+      "date": "2026-03-23",
+      "time": "21:00",
+      "timestamp": "2026-03-23T21:00:00"
+    }
+  ],
+  "exportDate": "2026-03-24T18:06:09.754Z"
 }
