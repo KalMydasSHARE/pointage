@@ -19,24 +19,6 @@
   ],
   "timbrages": [
     {
-      "id": "t_1774375238680_zx42",
-      "employeeId": "emp_1774308354765_8m70",
-      "employeeName": "Thomas",
-      "type": "SORTIE",
-      "date": "2026-03-24",
-      "time": "19:00",
-      "timestamp": "2026-03-24T19:00:00"
-    },
-    {
-      "id": "t_1774375243665_pvg9",
-      "employeeId": "emp_1774308357090_qngz",
-      "employeeName": "Rachel",
-      "type": "SORTIE",
-      "date": "2026-03-24",
-      "time": "19:00",
-      "timestamp": "2026-03-24T19:00:00"
-    },
-    {
       "id": "t_1774375247277_mjiu",
       "employeeId": "emp_1774308344339_f6c6",
       "employeeName": "Ethan",
@@ -73,5 +55,5 @@
       "timestamp": "2026-03-24T19:00:00"
     }
   ],
-  "exportDate": "2026-03-24T18:01:11.053Z"
+  "exportDate": "2026-03-24T18:01:12.164Z"
 }
