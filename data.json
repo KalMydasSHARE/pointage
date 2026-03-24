@@ -15,6 +15,10 @@
     {
       "id": "emp_1774308357090_qngz",
       "name": "Rachel"
+    },
+    {
+      "id": "emp_1774383602245_mj9s",
+      "name": "Jean"
     }
   ],
   "timbrages": [
@@ -73,5 +77,5 @@
       "timestamp": "2026-03-24T20:31:00"
     }
   ],
-  "exportDate": "2026-03-24T19:31:33.154Z"
+  "exportDate": "2026-03-24T20:20:02.246Z"
 }
