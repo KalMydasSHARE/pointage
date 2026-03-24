@@ -28,15 +28,6 @@
       "timestamp": "2026-03-23T21:00:00"
     },
     {
-      "id": "t_1774375581162_9aqv",
-      "employeeId": "emp_1774308357090_qngz",
-      "employeeName": "Rachel",
-      "type": "ENTRÉE",
-      "date": "2026-03-23",
-      "time": "23:59",
-      "timestamp": "2026-03-23T23:59:00"
-    },
-    {
       "id": "t_1774375590019_43kg",
       "employeeId": "emp_1774308357090_qngz",
       "employeeName": "Rachel",
@@ -64,5 +55,5 @@
       "timestamp": "2026-03-24T19:06:00"
     }
   ],
-  "exportDate": "2026-03-24T18:06:47.848Z"
+  "exportDate": "2026-03-24T18:07:24.908Z"
 }
