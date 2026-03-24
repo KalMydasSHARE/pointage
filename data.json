@@ -17,16 +17,6 @@
       "name": "Rachel"
     }
   ],
-  "timbrages": [
-    {
-      "id": "t_1774375255580_32oa",
-      "employeeId": "emp_1774308350085_4cl7",
-      "employeeName": "Stéphanie",
-      "type": "SORTIE",
-      "date": "2026-03-24",
-      "time": "19:00",
-      "timestamp": "2026-03-24T19:00:00"
-    }
-  ],
-  "exportDate": "2026-03-24T18:01:14.296Z"
+  "timbrages": [],
+  "exportDate": "2026-03-24T18:01:15.096Z"
 }
