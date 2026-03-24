@@ -8,9 +8,16 @@
 const ADMIN_PASSWORD = "choco2026";
 const ACCESS_PASSWORD = "pots2026";  // mot de passe pour accéder au pointage
 
-// GitHub Sync (remplis ces 2 champs)
-const GITHUB_TOKEN = "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";  // ton Perhsonal Access Token GitHub
-const GITHUB_REPO  = "KalMydasSHARE/pointage";  // format: "toncompte/ton-repo"
+// GitHub Sync
+const GITHUB_REPO = "KalMydasSHARE/pointage";
+
+// Token stocké dans le navigateur (jamais dans le code source)
+function getGitHubToken() {
+    return localStorage.getItem('pointage_github_token') || '';
+}
+function setGitHubToken(token) {
+    localStorage.setItem('pointage_github_token', token);
+}
 
 // ============================================
 // STOCKAGE LOCAL (localStorage)
@@ -22,7 +29,7 @@ const Storage = {
 
     saveEmployees(employees) {
         localStorage.setItem('pointage_employees', JSON.stringify(employees));
-        GitSync.push();
+        GitSync.push(); // sync auto
     },
 
     addEmployee(name) {
@@ -44,7 +51,7 @@ const Storage = {
         return this.getEmployees().find(e => e.id === id) || null;
     },
 
-    // Timbrages
+    // ── Timbrages ──
     getTimbrages() {
         return JSON.parse(localStorage.getItem('pointage_timbrages') || '[]');
     },
@@ -95,7 +102,7 @@ const Storage = {
             .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
     },
 
-    // Export / Import
+    // ── Export / Import ──
     exportAll() {
         return JSON.stringify({
             employees: this.getEmployees(),
@@ -117,15 +124,17 @@ const Storage = {
 const GitSync = {
     _pushing: false,
     _pendingPush: false,
-    _sha: null,
+    _sha: null, // SHA du fichier sur GitHub (nécessaire pour update)
 
     isConfigured() {
-        return GITHUB_TOKEN !== "REMPLACE_MOI" && GITHUB_REPO !== "REMPLACE_MOI";
+        return getGitHubToken() !== '' && GITHUB_REPO !== '';
     },
 
+    // Envoyer les données vers GitHub
     async push() {
         if (!this.isConfigured()) return;
 
+        // Anti-flood : si un push est déjà en cours, on note qu'il faut en refaire un après
         if (this._pushing) {
             this._pendingPush = true;
             return;
@@ -142,6 +151,7 @@ const GitSync = {
                 content: content
             };
 
+            // Si on connaît le SHA, on fait un update (sinon GitHub refuse)
             if (this._sha) {
                 body.sha = this._sha;
             }
@@ -151,7 +161,7 @@ const GitSync = {
                 {
                     method: 'PUT',
                     headers: {
-                        'Authorization': 'Bearer ' + GITHUB_TOKEN,
+                        'Authorization': 'Bearer ' + getGitHubToken(),
                         'Content-Type': 'application/json',
                         'Accept': 'application/vnd.github.v3+json'
                     },
@@ -168,6 +178,7 @@ const GitSync = {
                 const err = await response.json();
                 console.error('GitHub sync erreur:', err.message);
 
+                // Si erreur 409 (conflit SHA), récupérer le bon SHA et réessayer
                 if (response.status === 409 || response.status === 422) {
                     await this.pull();
                     this._pushing = false;
@@ -183,12 +194,14 @@ const GitSync = {
 
         this._pushing = false;
 
+        // S'il y avait un push en attente, on le fait maintenant
         if (this._pendingPush) {
             this._pendingPush = false;
             this.push();
         }
     },
 
+    // Récupérer les données depuis GitHub
     async pull() {
         if (!this.isConfigured()) return false;
 
@@ -199,7 +212,7 @@ const GitSync = {
                 'https://api.github.com/repos/' + GITHUB_REPO + '/contents/data.json',
                 {
                     headers: {
-                        'Authorization': 'Bearer ' + GITHUB_TOKEN,
+                        'Authorization': 'Bearer ' + getGitHubToken(),
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 }
@@ -209,24 +222,28 @@ const GitSync = {
                 const result = await response.json();
                 this._sha = result.sha;
 
+                // Décoder le contenu (base64)
                 const content = decodeURIComponent(escape(atob(result.content)));
                 const data = JSON.parse(content);
 
+                // Comparer : prendre les données qui ont le plus d'entrées
                 const localTimbrages = Storage.getTimbrages();
                 const remoteTimbrages = data.timbrages || [];
 
                 if (remoteTimbrages.length > localTimbrages.length) {
+                    // GitHub a plus de données → restaurer
                     Storage.importAll(content);
                     console.log('GitHub pull: données restaurées depuis GitHub');
                     this._updateIndicator('ok');
-                    return true;
+                    return true; // données mises à jour
                 } else {
                     console.log('GitHub pull: données locales à jour');
                     this._updateIndicator('ok');
-                    return false;
+                    return false; // pas de changement
                 }
 
             } else if (response.status === 404) {
+                // Fichier n'existe pas encore — premier push le créera
                 console.log('GitHub: data.json n\'existe pas encore');
                 this._sha = null;
                 this._updateIndicator('ok');
@@ -243,6 +260,7 @@ const GitSync = {
         }
     },
 
+    // Petit indicateur visuel dans la page
     _updateIndicator(status) {
         const el = document.getElementById('syncIndicator');
         if (!el) return;
@@ -253,6 +271,7 @@ const GitSync = {
         } else if (status === 'ok') {
             el.textContent = 'Sauvegardé';
             el.className = 'sync-indicator ok';
+            // Masquer après 3s
             setTimeout(() => { el.className = 'sync-indicator hidden'; }, 3000);
         } else if (status === 'error') {
             el.textContent = 'Erreur sync';
@@ -260,6 +279,7 @@ const GitSync = {
         }
     },
 
+    // Initialiser : pull au démarrage
     async init() {
         if (!this.isConfigured()) {
             console.log('GitHub sync désactivé (pas configuré)');
