@@ -27,9 +27,7 @@
                 </div>
 
                 <!-- Bouton Timbrer -->
-                <button id="timbrBtn" class="timbrer-btn" disabled>
-                    TIMBRER
-                </button>
+                <button id="timbrBtn" class="timbrer-btn" disabled>TIMBRER</button>
 
                 <!-- Status -->
                 <div class="status-bar">
@@ -46,9 +44,37 @@
                     <div id="todayTotal" class="today-total" style="display:none;"></div>
                 </div>
 
-                <!-- Balance mensuelle -->
-                <div id="empBalance" class="emp-balance-section" style="display:none;">
-                    <div id="empBalanceContent"></div>
+                <!-- Balance mensuelle SIMPLIFIÉE -->
+                <div id="empMonthProgress" class="month-progress-section" style="display:none;">
+                    <h3 id="monthProgressTitle">Ce mois</h3>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="progressBarFill"></div>
+                        <span class="progress-bar-label" id="progressBarLabel">0%</span>
+                    </div>
+                    <div class="month-stats">
+                        <div class="stat-row">
+                            <span>Heures ce mois</span>
+                            <strong id="monthWorked">0h 00min</strong>
+                        </div>
+                        <div class="stat-row">
+                            <span>Objectif mensuel</span>
+                            <span id="monthTarget">0h 00min</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Il reste</span>
+                            <strong id="monthRemaining">0h 00min</strong>
+                        </div>
+                    </div>
+                    <!-- Balance proratisée (petit nombre, pas effrayant) -->
+                    <div id="proratedBalance" class="prorated-balance"></div>
+                </div>
+
+                <!-- Historique (caché par défaut) -->
+                <div class="history-toggle" id="historyToggle" style="display:none;">
+                    <button class="btn-link" onclick="toggleHistory()">Voir l'historique du mois</button>
+                </div>
+                <div id="historySection" class="history-section" style="display:none;">
+                    <div id="historyContent"></div>
                 </div>
             </div>
         </div>
@@ -64,30 +90,24 @@
         const todayTotal = document.getElementById('todayTotal');
 
         let selectedEmpId = null;
-        let nextType = 'ENTRÉE';  // ✅ Initialisée correctement
+        let nextType = 'ENTRÉE';
 
-        // ── Charger les employés ──
         function loadEmployees() {
             const employees = Storage.getEmployees();
             empSelect.innerHTML = '<option value="">-- Choisis ton nom --</option>';
-
             employees.forEach(emp => {
                 const opt = document.createElement('option');
-                opt.value = emp.id;
-                opt.textContent = emp.name;
+                opt.value = emp.id; opt.textContent = emp.name;
                 empSelect.appendChild(opt);
             });
-
             if (employees.length === 0) {
                 statusMain.textContent = 'Aucun employé configuré';
                 statusSub.textContent = 'Le gestionnaire doit ajouter les employés (page Admin)';
             }
         }
 
-        // ── Sélection d'un employé ──
         empSelect.addEventListener('change', () => {
             selectedEmpId = empSelect.value;
-
             if (!selectedEmpId) {
                 timbrBtn.disabled = true;
                 timbrBtn.className = 'timbrer-btn';
@@ -96,21 +116,19 @@
                 statusSub.textContent = '';
                 todayTimings.innerHTML = '<div class="empty-state">Choisis ton nom</div>';
                 todayTotal.style.display = 'none';
+                document.getElementById('empMonthProgress').style.display = 'none';
+                document.getElementById('historyToggle').style.display = 'none';
+                document.getElementById('historySection').style.display = 'none';
                 return;
             }
-
             refreshStatus();
             refreshToday();
         });
 
-        // ── Rafraîchir le statut ──
         function refreshStatus() {
             if (!selectedEmpId) return;
-
             const last = Storage.getLastTimbre(selectedEmpId);
             const empName = empSelect.options[empSelect.selectedIndex].text;
-
-            // ✅ FIX: Vérifier que last.type est bien défini et faire la bonne affectation
             const lastType = last ? (last.type || '') : '';
 
             if (!last || lastType === 'SORTIE') {
@@ -126,128 +144,163 @@
                 statusMain.textContent = empName + ' — prochaine action : SORTIE';
                 statusSub.textContent = 'Entré(e) à ' + last.time;
             } else {
-                // ✅ Cas par défaut: quelque chose ne va pas, réinitialiser à ENTRÉE
                 nextType = 'ENTRÉE';
                 timbrBtn.textContent = 'ENTRÉE';
                 timbrBtn.className = 'timbrer-btn';
                 statusMain.textContent = empName + ' — prochaine action : ENTRÉE';
-                statusSub.textContent = 'État indéfini (erreur)';
+                statusSub.textContent = '';
             }
-
             timbrBtn.disabled = false;
         }
 
-        // ── Rafraîchir les timbrages du jour ──
         function refreshToday() {
             if (!selectedEmpId) return;
-
             const today = todayStr();
             const timbrages = Storage.getTimbragesByEmpAndDate(selectedEmpId, today);
-
             todayTimings.innerHTML = '';
 
             if (timbrages.length === 0) {
                 todayTimings.innerHTML = '<div class="empty-state">Aucun timbre aujourd\'hui</div>';
                 todayTotal.style.display = 'none';
-                return;
-            }
+            } else {
+                timbrages.forEach(t => {
+                    const isEntry = t.type === 'ENTRÉE';
+                    const row = document.createElement('div');
+                    row.className = 'timing-row';
+                    row.innerHTML = '<span class="dot ' + (isEntry ? 'entry' : 'exit') + '"></span>' +
+                        '<span class="time">' + t.time + '</span>' +
+                        '<span class="type">' + t.type + '</span>';
+                    todayTimings.appendChild(row);
+                });
 
-            timbrages.forEach(t => {
-                const isEntry = t.type === 'ENTRÉE';
-                const row = document.createElement('div');
-                row.className = 'timing-row';
-                row.innerHTML =
-                    '<span class="dot ' + (isEntry ? 'entry' : 'exit') + '"></span>' +
-                    '<span class="time">' + t.time + '</span>' +
-                    '<span class="type">' + t.type + '</span>';
-                todayTimings.appendChild(row);
-            });
-
-            // Calculer total d'heures
-            let totalH = 0;
-            for (let i = 0; i < timbrages.length; i += 2) {
-                if (timbrages[i] && timbrages[i + 1] &&
-                    timbrages[i].type === 'ENTRÉE' && timbrages[i + 1].type === 'SORTIE') {
-                    totalH += calculateHours(timbrages[i].time, timbrages[i + 1].time, today);
+                let totalH = 0;
+                for (let i = 0; i < timbrages.length; i += 2) {
+                    if (timbrages[i] && timbrages[i+1] && timbrages[i].type === 'ENTRÉE' && timbrages[i+1].type === 'SORTIE') {
+                        totalH += calculateHours(timbrages[i].time, timbrages[i+1].time, today);
+                    }
+                }
+                if (totalH > 0) {
+                    todayTotal.textContent = 'Total aujourd\'hui : ' + formatHours(totalH);
+                    todayTotal.style.display = 'block';
+                } else {
+                    todayTotal.style.display = 'none';
                 }
             }
 
-            if (totalH > 0) {
-                todayTotal.textContent = 'Total aujourd\'hui : ' + formatHours(totalH);
-                todayTotal.style.display = 'block';
-            } else {
-                todayTotal.style.display = 'none';
-            }
-
-            // Afficher la balance mensuelle
-            refreshBalance();
+            refreshMonthProgress();
         }
 
-        function refreshBalance() {
-            const balanceSection = document.getElementById('empBalance');
-            const balanceContent = document.getElementById('empBalanceContent');
-            if (!selectedEmpId) {
-                balanceSection.style.display = 'none';
+        function refreshMonthProgress() {
+            if (!selectedEmpId) return;
+            const info = getEmployeeMonthInfo(selectedEmpId);
+            const section = document.getElementById('empMonthProgress');
+            section.style.display = 'block';
+            document.getElementById('historyToggle').style.display = 'block';
+
+            // Titre
+            document.getElementById('monthProgressTitle').textContent = monthNameFr(info.ym) + ' (' + info.pct + '%)';
+
+            // Barre de progression
+            const fill = document.getElementById('progressBarFill');
+            fill.style.width = info.progressPct + '%';
+            fill.className = 'progress-bar-fill' + (info.progressPct >= 100 ? ' complete' : '');
+            document.getElementById('progressBarLabel').textContent = info.progressPct + '%';
+
+            // Stats
+            document.getElementById('monthWorked').textContent = formatHours(info.worked);
+            document.getElementById('monthTarget').textContent = formatHours(info.monthTarget);
+            document.getElementById('monthRemaining').textContent = formatHours(info.remaining);
+
+            // Balance proratisée (petit nombre basé sur les jours écoulés)
+            const balDiv = document.getElementById('proratedBalance');
+            if (info.elapsedWorkDays > 0) {
+                const bal = info.proratedBalance;
+                const isPositive = bal >= 0;
+                balDiv.className = 'prorated-balance ' + (isPositive ? 'balance-positive' : 'balance-negative');
+                if (isPositive) {
+                    balDiv.innerHTML = '<span class="bal-icon">&#9650;</span> En avance de ' + formatHours(Math.abs(bal));
+                } else {
+                    balDiv.innerHTML = '<span class="bal-icon">&#9660;</span> ' + formatHours(Math.abs(bal)) + ' à rattraper';
+                }
+            } else {
+                balDiv.className = 'prorated-balance';
+                balDiv.textContent = 'Début du mois';
+            }
+        }
+
+        function toggleHistory() {
+            const section = document.getElementById('historySection');
+            const isVisible = section.style.display !== 'none';
+            section.style.display = isVisible ? 'none' : 'block';
+            if (!isVisible) loadHistory();
+        }
+
+        function loadHistory() {
+            if (!selectedEmpId) return;
+            const ym = currentMonthStr();
+            const timbrages = Storage.getTimbragesByMonth(ym).filter(t => t.employeeId === selectedEmpId);
+            const container = document.getElementById('historyContent');
+            container.innerHTML = '';
+
+            if (timbrages.length === 0) {
+                container.innerHTML = '<div class="empty-state">Aucun timbrage ce mois</div>';
                 return;
             }
 
-            const ym = currentMonthStr();
-            const worked = getWorkedHoursForMonth(selectedEmpId, ym);
-            const pct = Storage.getContract(selectedEmpId, ym);
-            const target = CONTRACT_BASE_HOURS * (pct / 100);
-            const balance = worked - target;
-            const balCls = balance >= 0 ? 'balance-positive' : 'balance-negative';
+            // Grouper par date
+            const byDate = {};
+            timbrages.forEach(t => {
+                if (!byDate[t.date]) byDate[t.date] = [];
+                byDate[t.date].push(t);
+            });
 
-            // Cumul annuel
-            const year = new Date().getFullYear();
-            const yearData = getYearBalance(selectedEmpId, year);
-            const cumCls = yearData.cumBalance >= 0 ? 'balance-positive' : 'balance-negative';
+            const dates = Object.keys(byDate).sort().reverse();
+            dates.forEach(date => {
+                const dayTimbrages = byDate[date];
+                let dayHours = 0;
+                let entry = null;
+                dayTimbrages.forEach(t => {
+                    if (t.type === 'ENTRÉE') entry = t;
+                    else if (t.type === 'SORTIE' && entry) { dayHours += calculateHours(entry.time, t.time, date); entry = null; }
+                });
 
-            balanceContent.innerHTML =
-                '<div class="balance-row">' +
-                    '<span>Ce mois (' + pct + '%) :</span>' +
-                    '<span>' + formatHours(worked) + ' / ' + formatHours(target) + '</span>' +
-                    '<strong class="' + balCls + '">' + formatBalance(balance) + '</strong>' +
-                '</div>' +
-                '<div class="balance-row">' +
-                    '<span>Cumul ' + year + ' :</span>' +
-                    '<span></span>' +
-                    '<strong class="' + cumCls + '">' + formatBalance(yearData.cumBalance) + '</strong>' +
-                '</div>';
-
-            balanceSection.style.display = 'block';
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'history-day';
+                let html = '<div class="history-day-header">' +
+                    '<span>' + formatDateDisplay(date) + '</span>' +
+                    '<strong>' + (dayHours > 0 ? formatHours(dayHours) : 'En cours') + '</strong></div>';
+                html += '<div class="history-day-entries">';
+                dayTimbrages.forEach(t => {
+                    const icon = t.type === 'ENTRÉE' ? '&#9654;' : '&#9632;';
+                    html += '<span class="history-entry">' + icon + ' ' + t.time + ' ' + t.type + '</span>';
+                });
+                html += '</div>';
+                dayDiv.innerHTML = html;
+                container.appendChild(dayDiv);
+            });
         }
 
         // ── Cliquer sur TIMBRER ──
         timbrBtn.addEventListener('click', () => {
             if (!selectedEmpId || !nextType) return;
-
             timbrBtn.disabled = true;
             const empName = empSelect.options[empSelect.selectedIndex].text;
-            const now = new Date();
             const date = todayStr();
             const time = nowTimeStr();
 
-            // ✅ Sauvegarder le timbre
-            Storage.addTimbre(selectedEmpId, empName, nextType, date, time);
+            Storage.addTimbre(selectedEmpId, empName, nextType, date, time, 'system', '');
 
-            // ✅ Pré-calculer le prochain type IMMÉDIATEMENT
             const justRegisteredType = nextType;
             const nextTypeAfterClick = (justRegisteredType === 'ENTRÉE') ? 'SORTIE' : 'ENTRÉE';
 
-            // Flash vert
             timbrBtn.className = 'timbrer-btn flash-success';
             timbrBtn.textContent = justRegisteredType + ' OK';
             statusMain.textContent = justRegisteredType + ' enregistrée pour ' + empName;
 
-            // Rafraîchir après 1.5s (avec vérification supplémentaire)
             setTimeout(() => {
                 refreshStatus();
                 refreshToday();
-
-                // ✅ Force le bouton au bon état si refreshStatus ne l'a pas bien fait
                 if (nextType !== nextTypeAfterClick) {
-                    console.warn('⚠️ Correction force du bouton:', nextType, '→', nextTypeAfterClick);
                     nextType = nextTypeAfterClick;
                     timbrBtn.textContent = nextType;
                     timbrBtn.className = (nextType === 'SORTIE') ? 'timbrer-btn is-sortie' : 'timbrer-btn';
@@ -259,7 +312,6 @@
         async function init() {
             const updated = await GitSync.init();
             loadEmployees();
-            // Si les données ont été mises à jour depuis GitHub, re-charger
             if (updated) loadEmployees();
         }
         init();

@@ -12,10 +12,42 @@
         <div class="login-box">
             <h2>Admin</h2>
             <p>Mot de passe administrateur</p>
-            <input type="password" id="loginPwd" placeholder="Mot de passe"
-                   onkeypress="if(event.key==='Enter') doLogin()">
+            <input type="password" id="loginPwd" placeholder="Mot de passe" onkeypress="if(event.key==='Enter') doLogin()">
             <div class="login-error" id="loginErr"></div>
             <button class="btn btn-primary" style="width:100%;padding:14px;" onclick="doLogin()">Connexion</button>
+        </div>
+    </div>
+
+    <!-- MODAL ÉDITION TIMBRAGE -->
+    <div class="modal-overlay" id="editModal" style="display:none;">
+        <div class="modal-box">
+            <h3>Modifier le timbrage</h3>
+            <input type="hidden" id="editTimbreId">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="editDate" class="input-field">
+                </div>
+                <div class="form-group">
+                    <label>Heure</label>
+                    <input type="time" id="editTime" class="input-field">
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select id="editType" class="input-field">
+                        <option value="ENTRÉE">ENTRÉE</option>
+                        <option value="SORTIE">SORTIE</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" style="margin-top:10px;">
+                <label>Remarque (optionnel)</label>
+                <input type="text" id="editRemark" class="input-field" placeholder="Ex: Correction erreur de saisie" style="width:100%;">
+            </div>
+            <div style="display:flex;gap:10px;margin-top:15px;justify-content:flex-end;">
+                <button class="btn btn-outline" onclick="closeEditModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="saveEditTimbre()">Enregistrer</button>
+            </div>
         </div>
     </div>
 
@@ -30,7 +62,6 @@
         </div>
 
         <div class="main-content">
-            <!-- Print header -->
             <div class="print-header">
                 <h2>Rapport de pointage</h2>
                 <p id="printPeriod"></p>
@@ -42,6 +73,7 @@
                 <button class="tab-btn" data-tab="month" onclick="switchTab('month')">Mensuel</button>
                 <button class="tab-btn" data-tab="balance" onclick="switchTab('balance')">Balance</button>
                 <button class="tab-btn" data-tab="employees" onclick="switchTab('employees')">Employés</button>
+                <button class="tab-btn" data-tab="holidays" onclick="switchTab('holidays')">Fériés</button>
                 <button class="tab-btn" data-tab="backup" onclick="switchTab('backup')">Sauvegarde</button>
             </div>
 
@@ -54,7 +86,6 @@
                     <button class="btn btn-outline" onclick="loadDayData()">Actualiser</button>
                 </div>
 
-                <!-- Ajout manuel -->
                 <div class="manual-form">
                     <h3>Ajouter un timbre manuellement</h3>
                     <div class="form-row">
@@ -77,6 +108,12 @@
                             <label>Heure</label>
                             <input type="time" id="manualTime" class="input-field">
                         </div>
+                    </div>
+                    <div class="form-row" style="margin-top:10px;">
+                        <div class="form-group" style="flex:3;">
+                            <label>Remarque (optionnel)</label>
+                            <input type="text" id="manualRemark" class="input-field" placeholder="Ex: Oubli de timbrage, correction, etc." style="width:100%;">
+                        </div>
                         <div class="form-group" style="justify-content:flex-end;">
                             <button class="btn btn-success" onclick="addManualTimbre()">Ajouter</button>
                         </div>
@@ -89,6 +126,7 @@
                             <th>Heure</th>
                             <th>Employé</th>
                             <th>Type</th>
+                            <th>Remarque</th>
                             <th class="actions">Actions</th>
                         </tr>
                     </thead>
@@ -115,13 +153,11 @@
                             <th>Entree</th>
                             <th>Sortie</th>
                             <th>Heures</th>
+                            <th>Remarque</th>
                         </tr>
                     </thead>
                     <tbody id="monthTableBody"></tbody>
                 </table>
-
-                <!-- Balance mensuelle par employe -->
-                <div id="monthBalanceSummary" style="margin-top:25px;"></div>
             </div>
 
             <!-- ============================== -->
@@ -135,7 +171,6 @@
                     </select>
                     <button class="btn btn-outline" onclick="loadBalanceData()">Actualiser</button>
                 </div>
-
                 <div id="balanceContent"></div>
             </div>
 
@@ -144,59 +179,66 @@
             <!-- ============================== -->
             <div id="tab-employees" class="tab-panel">
                 <div class="controls-bar">
-                    <input type="text" id="newEmpName" class="input-field"
-                           placeholder="Nom du nouvel employe"
-                           onkeypress="if(event.key==='Enter') addEmployee()">
+                    <input type="text" id="newEmpName" class="input-field" placeholder="Nom du nouvel employe" onkeypress="if(event.key==='Enter') addEmployee()">
                     <button class="btn btn-success" onclick="addEmployee()">Ajouter</button>
                 </div>
 
                 <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Nom</th>
-                            <th>% Travail</th>
-                            <th>Heures dues</th>
-                            <th class="actions">Actions</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Nom</th><th>% Travail</th><th>Heures dues</th><th class="actions">Actions</th></tr></thead>
                     <tbody id="empTableBody"></tbody>
                 </table>
 
                 <div class="contract-section" style="margin-top:25px;">
                     <h3 style="color:var(--chocolate);margin-bottom:15px;">Pourcentage de travail par mois</h3>
-                    <p style="color:var(--text-muted);font-size:0.9em;margin-bottom:15px;">
-                        Base : 182h/mois = 100%. Modifie le pourcentage pour ajuster les heures dues.
-                    </p>
+                    <p style="color:var(--text-muted);font-size:0.9em;margin-bottom:15px;">Base : 182h/mois = 100%. Modifie le pourcentage pour ajuster les heures dues.</p>
                     <div class="form-row" style="margin-bottom:15px;">
-                        <div class="form-group">
-                            <label>Employe</label>
-                            <select id="contractEmp" class="input-field"></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Mois</label>
-                            <input type="month" id="contractMonth" class="input-field">
-                        </div>
-                        <div class="form-group">
-                            <label>Pourcentage (%)</label>
-                            <input type="number" id="contractPct" class="input-field" min="0" max="100" value="100" step="5">
-                        </div>
-                        <div class="form-group" style="justify-content:flex-end;">
-                            <button class="btn btn-success" onclick="saveContract()">Enregistrer</button>
-                        </div>
+                        <div class="form-group"><label>Employe</label><select id="contractEmp" class="input-field"></select></div>
+                        <div class="form-group"><label>Mois</label><input type="month" id="contractMonth" class="input-field"></div>
+                        <div class="form-group"><label>Pourcentage (%)</label><input type="number" id="contractPct" class="input-field" min="0" max="100" value="100" step="5"></div>
+                        <div class="form-group" style="justify-content:flex-end;"><button class="btn btn-success" onclick="saveContract()">Enregistrer</button></div>
                     </div>
                     <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Employe</th>
-                                <th>Mois</th>
-                                <th>%</th>
-                                <th>Heures dues</th>
-                                <th class="actions">Actions</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Employe</th><th>Mois</th><th>%</th><th>Heures dues</th><th class="actions">Actions</th></tr></thead>
                         <tbody id="contractTableBody"></tbody>
                     </table>
                 </div>
+            </div>
+
+            <!-- ============================== -->
+            <!-- TAB: JOURS FÉRIÉS             -->
+            <!-- ============================== -->
+            <div id="tab-holidays" class="tab-panel">
+                <div class="manual-form">
+                    <h3>Ajouter un jour férié</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="holidayDate" class="input-field">
+                        </div>
+                        <div class="form-group" style="flex:2;">
+                            <label>Nom</label>
+                            <input type="text" id="holidayName" class="input-field" placeholder="Ex: Jour de l'An, Fête nationale..." style="width:100%;">
+                        </div>
+                        <div class="form-group" style="justify-content:flex-end;">
+                            <button class="btn btn-success" onclick="addHoliday()">Ajouter</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:15px;">
+                    <button class="btn btn-outline btn-small" onclick="addDefaultHolidays()">Ajouter les fériés Québec 2026</button>
+                </div>
+
+                <p style="color:var(--text-muted);font-size:0.9em;margin-bottom:15px;">
+                    Les jours fériés sont exclus du calcul des jours ouvrés. Cela réduit l'objectif mensuel proportionnellement.
+                </p>
+
+                <table class="data-table">
+                    <thead><tr><th>Date</th><th>Jour</th><th>Nom</th><th class="actions">Actions</th></tr></thead>
+                    <tbody id="holidayTableBody"></tbody>
+                </table>
+
+                <div id="holidayStats" style="margin-top:20px;"></div>
             </div>
 
             <!-- ============================== -->
@@ -206,7 +248,7 @@
                 <div class="backup-section">
                     <div class="backup-card">
                         <h3>Synchronisation GitHub</h3>
-                        <p>Entre ton token GitHub pour activer la sauvegarde automatique sur GitHub. Le token est stocké uniquement dans ce navigateur.</p>
+                        <p>Entre ton token GitHub pour activer la sauvegarde automatique.</p>
                         <input type="password" id="githubTokenInput" class="input-field" placeholder="github_pat_..." style="margin-bottom:10px;font-family:monospace;">
                         <div style="display:flex;gap:8px;">
                             <button class="btn btn-success" onclick="saveGitToken()">Enregistrer le token</button>
@@ -214,16 +256,14 @@
                         </div>
                         <div id="gitStatus" style="margin-top:10px;font-size:14px;"></div>
                     </div>
-
                     <div class="backup-card">
                         <h3>Exporter les données</h3>
-                        <p>Télécharge toutes les données (employés + timbrages) en fichier JSON. Garde ce fichier en sécurité.</p>
+                        <p>Télécharge toutes les données en fichier JSON.</p>
                         <button class="btn btn-primary" onclick="exportBackup()">Télécharger la sauvegarde</button>
                     </div>
-
                     <div class="backup-card">
                         <h3>Importer des données</h3>
-                        <p>Restaure les données depuis un fichier JSON de sauvegarde. Attention : ça remplace les données actuelles.</p>
+                        <p>Restaure depuis un fichier JSON. Attention : remplace les données actuelles.</p>
                         <input type="file" id="importFile" accept=".json" class="input-field" style="margin-bottom:10px;">
                         <button class="btn btn-danger" onclick="importBackup()">Restaurer la sauvegarde</button>
                     </div>
@@ -253,16 +293,14 @@
         // TABS
         // ============================================
         function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                b.classList.toggle('active', b.dataset.tab === tab);
-            });
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
             document.getElementById('tab-' + tab).classList.add('active');
-
             if (tab === 'today') loadDayData();
             if (tab === 'month') loadMonthData();
             if (tab === 'balance') loadBalanceData();
             if (tab === 'employees') loadEmployeesTab();
+            if (tab === 'holidays') loadHolidaysTab();
             if (tab === 'backup') loadBackupTab();
         }
 
@@ -286,8 +324,7 @@
             sel.innerHTML = '';
             Storage.getEmployees().forEach(e => {
                 const opt = document.createElement('option');
-                opt.value = e.id;
-                opt.textContent = e.name;
+                opt.value = e.id; opt.textContent = e.name;
                 sel.appendChild(opt);
             });
         }
@@ -298,26 +335,44 @@
         function loadDayData() {
             const date = document.getElementById('dayFilter').value;
             if (!date) return;
-
             const timbrages = Storage.getTimbragesByDate(date);
             const tbody = document.getElementById('dayTableBody');
             tbody.innerHTML = '';
 
             if (timbrages.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Aucun timbre ce jour</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Aucun timbre ce jour</td></tr>';
                 return;
             }
 
             timbrages.forEach(t => {
                 const isEntry = t.type === 'ENTRÉE';
+                const remarkTag = buildRemarkTag(t);
                 const tr = document.createElement('tr');
                 tr.innerHTML =
                     '<td>' + t.time + '</td>' +
                     '<td>' + t.employeeName + '</td>' +
                     '<td><span class="dot ' + (isEntry ? 'entry' : 'exit') + '" style="display:inline-block;vertical-align:middle;margin-right:6px;"></span>' + t.type + '</td>' +
-                    '<td class="actions"><button class="btn btn-danger btn-small" onclick="deleteTimbre(\'' + t.id + '\')">Supprimer</button></td>';
+                    '<td>' + remarkTag + '</td>' +
+                    '<td class="actions">' +
+                        '<button class="btn btn-outline btn-small" onclick="openEditModal(\'' + t.id + '\')">Modifier</button> ' +
+                        '<button class="btn btn-danger btn-small" onclick="deleteTimbre(\'' + t.id + '\')">Supprimer</button>' +
+                    '</td>';
                 tbody.appendChild(tr);
             });
+        }
+
+        function buildRemarkTag(t) {
+            let html = '';
+            if (t.source === 'admin_manual') html += '<span class="remark-tag manual">Manuel</span> ';
+            else if (t.source === 'admin_edit') html += '<span class="remark-tag edited">Modifié</span> ';
+            if (t.remark) html += '<span class="remark-text">' + escapeHtml(t.remark) + '</span>';
+            return html || '<span class="remark-text muted">—</span>';
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
         }
 
         function deleteTimbre(id) {
@@ -331,24 +386,54 @@
             const type = document.getElementById('manualType').value;
             const date = document.getElementById('manualDate').value;
             const time = document.getElementById('manualTime').value;
+            const remark = document.getElementById('manualRemark').value.trim();
 
-            if (!empId || !date || !time) {
-                alert('Remplis tous les champs');
-                return;
-            }
+            if (!empId || !date || !time) { alert('Remplis tous les champs'); return; }
 
             const emp = Storage.getEmployeeById(empId);
             if (!emp) return;
 
-            Storage.addTimbre(empId, emp.name, type, date, time);
-
+            Storage.addTimbre(empId, emp.name, type, date, time, 'admin_manual', remark);
             document.getElementById('manualTime').value = '';
+            document.getElementById('manualRemark').value = '';
             document.getElementById('dayFilter').value = date;
             loadDayData();
         }
 
+        // ── Modal édition ──
+        function openEditModal(timbreId) {
+            const timbrages = Storage.getTimbrages();
+            const t = timbrages.find(x => x.id === timbreId);
+            if (!t) return;
+
+            document.getElementById('editTimbreId').value = timbreId;
+            document.getElementById('editDate').value = t.date;
+            document.getElementById('editTime').value = t.time;
+            document.getElementById('editType').value = t.type;
+            document.getElementById('editRemark').value = '';
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        function saveEditTimbre() {
+            const id = document.getElementById('editTimbreId').value;
+            const result = Storage.editTimbre(id, {
+                date: document.getElementById('editDate').value,
+                time: document.getElementById('editTime').value,
+                type: document.getElementById('editType').value,
+                remark: document.getElementById('editRemark').value.trim()
+            });
+            if (result) {
+                closeEditModal();
+                loadDayData();
+            }
+        }
+
         // ============================================
-        // TAB: MENSUEL
+        // TAB: MENSUEL (rapport nettoyé — pas de cards résumé)
         // ============================================
         let monthCSVData = [];
 
@@ -358,71 +443,59 @@
 
             const timbrages = Storage.getTimbragesByMonth(monthValue);
             const tbody = document.getElementById('monthTableBody');
-            const balanceSummary = document.getElementById('monthBalanceSummary');
             tbody.innerHTML = '';
-            balanceSummary.innerHTML = '';
             monthCSVData = [];
 
             if (timbrages.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Aucun timbre ce mois</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Aucun timbre ce mois</td></tr>';
                 return;
             }
 
-            // Organiser par employe > par date
+            // Organiser par employé > par date
             const byEmployee = {};
             timbrages.forEach(t => {
-                if (!byEmployee[t.employeeId]) {
-                    byEmployee[t.employeeId] = { name: t.employeeName, days: {} };
-                }
-                if (!byEmployee[t.employeeId].days[t.date]) {
-                    byEmployee[t.employeeId].days[t.date] = [];
-                }
+                if (!byEmployee[t.employeeId]) byEmployee[t.employeeId] = { name: t.employeeName, days: {} };
+                if (!byEmployee[t.employeeId].days[t.date]) byEmployee[t.employeeId].days[t.date] = [];
                 byEmployee[t.employeeId].days[t.date].push(t);
             });
 
-            // Trier par nom
             const sorted = Object.entries(byEmployee).sort((a, b) => a[1].name.localeCompare(b[1].name));
-
-            // Construire le tableau de balance pour afficher en bas
-            const balanceRows = [];
 
             sorted.forEach(([empId, emp]) => {
                 let totalHours = 0;
-                let totalDays = 0;
                 const dates = Object.keys(emp.days).sort();
 
-                dates.forEach(date => {
-                    totalDays++;
-                    const dayTimbrages = emp.days[date];
+                // Header employé
+                const headerTr = document.createElement('tr');
+                headerTr.className = 'day-header';
+                headerTr.innerHTML = '<td colspan="6">' + emp.name + '</td>';
+                tbody.appendChild(headerTr);
 
-                    // Pairer entree/sortie
+                dates.forEach(date => {
+                    const dayTimbrages = emp.days[date];
                     const pairs = [];
                     let currentEntry = null;
 
                     dayTimbrages.forEach(t => {
-                        if (t.type === 'ENTRÉE') {
-                            currentEntry = t;
-                        } else if (t.type === 'SORTIE' && currentEntry) {
+                        if (t.type === 'ENTRÉE') currentEntry = t;
+                        else if (t.type === 'SORTIE' && currentEntry) {
                             pairs.push({ entry: currentEntry, exit: t });
                             totalHours += calculateHours(currentEntry.time, t.time, date);
                             currentEntry = null;
                         }
                     });
-
-                    if (currentEntry) {
-                        pairs.push({ entry: currentEntry, exit: null });
-                    }
-
-                    if (pairs.length === 0) {
-                        pairs.push({ entry: null, exit: dayTimbrages[0] });
-                    }
+                    if (currentEntry) pairs.push({ entry: currentEntry, exit: null });
+                    if (pairs.length === 0) pairs.push({ entry: null, exit: dayTimbrages[0] });
 
                     pairs.forEach((pair, idx) => {
                         const entryTime = pair.entry ? pair.entry.time : '-';
                         const exitTime = pair.exit ? pair.exit.time : '(en cours)';
-                        const hours = (pair.entry && pair.exit)
-                            ? formatHours(calculateHours(pair.entry.time, pair.exit.time, date))
-                            : '-';
+                        const hours = (pair.entry && pair.exit) ? formatHours(calculateHours(pair.entry.time, pair.exit.time, date)) : '-';
+                        const remarkParts = [];
+                        if (pair.entry && pair.entry.remark) remarkParts.push(pair.entry.remark);
+                        if (pair.exit && pair.exit.remark) remarkParts.push(pair.exit.remark);
+                        const remarkStr = remarkParts.join(' | ');
+                        const remarkDisplay = buildRemarkTagFromPair(pair);
 
                         const tr = document.createElement('tr');
                         tr.innerHTML =
@@ -430,83 +503,59 @@
                             '<td>' + (idx === 0 ? formatDateDisplay(date) : '') + '</td>' +
                             '<td>' + entryTime + '</td>' +
                             '<td>' + exitTime + '</td>' +
-                            '<td>' + hours + '</td>';
+                            '<td>' + hours + '</td>' +
+                            '<td>' + remarkDisplay + '</td>';
                         tbody.appendChild(tr);
 
-                        monthCSVData.push({
-                            employe: emp.name, date: date,
-                            entree: entryTime, sortie: exitTime, heures: hours
-                        });
+                        monthCSVData.push({ employe: emp.name, date, entree: entryTime, sortie: exitTime, heures: hours, remarque: remarkStr });
                     });
                 });
 
-                // Ligne total + balance
+                // Total + Balance
                 const pct = Storage.getContract(empId, monthValue);
                 const target = CONTRACT_BASE_HOURS * (pct / 100);
                 const balance = totalHours - target;
+                const balCls = balance >= 0 ? 'balance-positive' : 'balance-negative';
 
                 const totalTr = document.createElement('tr');
                 totalTr.className = 'subtotal-row';
                 totalTr.innerHTML =
-                    '<td colspan="3" style="text-align:right;"><strong>Total ' + emp.name + '</strong> (' + pct + '% = ' + formatHours(target) + ' dues)</td>' +
-                    '<td style="text-align:right;">Travaille :</td>' +
-                    '<td><strong>' + formatHours(totalHours) + '</strong></td>';
+                    '<td colspan="4" style="text-align:right;"><strong>Total ' + emp.name + '</strong> (' + pct + '% = ' + formatHours(target) + ' dues)</td>' +
+                    '<td><strong>' + formatHours(totalHours) + '</strong></td>' +
+                    '<td><strong class="' + balCls + '">' + formatBalance(balance) + '</strong></td>';
                 tbody.appendChild(totalTr);
 
-                // Ligne balance
-                const balanceTr = document.createElement('tr');
-                const balanceClass = balance >= 0 ? 'balance-positive' : 'balance-negative';
-                balanceTr.className = 'subtotal-row';
-                balanceTr.innerHTML =
-                    '<td colspan="4" style="text-align:right;">Balance :</td>' +
-                    '<td><strong class="' + balanceClass + '">' + formatBalance(balance) + '</strong></td>';
-                tbody.appendChild(balanceTr);
-
-                // Separator
+                // Séparateur
                 const sepTr = document.createElement('tr');
-                sepTr.innerHTML = '<td colspan="5" style="padding:4px;border:none;"></td>';
+                sepTr.innerHTML = '<td colspan="6" style="padding:4px;border:none;"></td>';
                 tbody.appendChild(sepTr);
-
-                balanceRows.push({ name: emp.name, empId, totalHours, totalDays, pct, target, balance });
             });
+        }
 
-            // Afficher un resume balance en bas
-            if (balanceRows.length > 0) {
-                let html = '<h3 style="color:var(--chocolate);margin-bottom:12px;">Resume balance — ' + monthNameFr(monthValue) + '</h3>';
-                html += '<div class="summary-cards">';
-                balanceRows.forEach(r => {
-                    const cls = r.balance >= 0 ? 'balance-positive' : 'balance-negative';
-                    html += '<div class="summary-card">' +
-                        '<div class="emp-name">' + r.name + ' (' + r.pct + '%)</div>' +
-                        '<div class="emp-hours">' + formatHours(r.totalHours) + ' / ' + formatHours(r.target) + '</div>' +
-                        '<div class="emp-days">' + r.totalDays + ' jour' + (r.totalDays > 1 ? 's' : '') + '</div>' +
-                        '<div class="balance-badge ' + cls + '" style="margin-top:8px;font-size:1.1em;font-weight:700;">' + formatBalance(r.balance) + '</div>' +
-                        '</div>';
-                });
-                html += '</div>';
-                balanceSummary.innerHTML = html;
-            }
+        function buildRemarkTagFromPair(pair) {
+            const items = [pair.entry, pair.exit].filter(Boolean);
+            let html = '';
+            items.forEach(t => {
+                if (t && (t.source === 'admin_manual' || t.source === 'admin_edit')) {
+                    const label = t.source === 'admin_manual' ? 'Manuel' : 'Modifié';
+                    const cls = t.source === 'admin_manual' ? 'manual' : 'edited';
+                    html += '<span class="remark-tag ' + cls + '">' + label + '</span> ';
+                }
+            });
+            return html || '';
         }
 
         function exportCSV() {
-            if (monthCSVData.length === 0) {
-                alert('Charge un mois d\'abord');
-                return;
-            }
-
+            if (monthCSVData.length === 0) { alert('Charge un mois d\'abord'); return; }
             const bom = '\uFEFF';
-            const headers = 'Employé;Date;Entrée;Sortie;Heures\n';
+            const headers = 'Employé;Date;Entrée;Sortie;Heures;Remarque\n';
             const rows = monthCSVData.map(r =>
-                '"' + r.employe + '";"' + r.date + '";"' + r.entree + '";"' + r.sortie + '";"' + r.heures + '"'
+                '"' + r.employe + '";"' + r.date + '";"' + r.entree + '";"' + r.sortie + '";"' + r.heures + '";"' + (r.remarque || '') + '"'
             ).join('\n');
-
             const blob = new Blob([bom + headers + rows], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'pointage_' + document.getElementById('monthFilter').value + '.csv';
-            a.click();
-            URL.revokeObjectURL(url);
+            const a = document.createElement('a'); a.href = url; a.download = 'pointage_' + document.getElementById('monthFilter').value + '.csv';
+            a.click(); URL.revokeObjectURL(url);
         }
 
         function printMonth() {
@@ -521,26 +570,21 @@
             const employees = Storage.getEmployees();
             const tbody = document.getElementById('empTableBody');
             tbody.innerHTML = '';
-            const currentMonth = currentMonthStr();
+            const cm = currentMonthStr();
 
             if (employees.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Aucun employe — ajoute-en!</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Aucun employé</td></tr>';
                 return;
             }
-
             employees.forEach(emp => {
-                const pct = Storage.getContract(emp.id, currentMonth);
+                const pct = Storage.getContract(emp.id, cm);
                 const target = CONTRACT_BASE_HOURS * (pct / 100);
                 const tr = document.createElement('tr');
                 tr.innerHTML =
-                    '<td>' + emp.name + '</td>' +
-                    '<td><strong>' + pct + '%</strong></td>' +
-                    '<td>' + formatHours(target) + '</td>' +
-                    '<td class="actions"><button class="btn btn-danger btn-small" onclick="deleteEmployee(\'' + emp.id + '\', \'' + emp.name.replace(/'/g, "\\'") + '\')">Supprimer</button></td>';
+                    '<td>' + emp.name + '</td><td><strong>' + pct + '%</strong></td><td>' + formatHours(target) + '</td>' +
+                    '<td class="actions"><button class="btn btn-danger btn-small" onclick="deleteEmployee(\'' + emp.id + '\', \'' + emp.name.replace(/'/g,"\\'") + '\')">Supprimer</button></td>';
                 tbody.appendChild(tr);
             });
-
-            // Charger aussi le tableau des contrats
             loadContractsTable();
             populateContractEmpSelect();
         }
@@ -548,21 +592,10 @@
         function addEmployee() {
             const input = document.getElementById('newEmpName');
             const name = input.value.trim();
-
-            if (!name) {
-                alert('Entre un nom');
-                return;
-            }
-
-            const exists = Storage.getEmployees().some(e => e.name.toLowerCase() === name.toLowerCase());
-            if (exists) {
-                alert('Cet employé existe déjà');
-                return;
-            }
-
+            if (!name) { alert('Entre un nom'); return; }
+            if (Storage.getEmployees().some(e => e.name.toLowerCase() === name.toLowerCase())) { alert('Existe déjà'); return; }
             Storage.addEmployee(name);
             input.value = '';
-            input.focus();
             loadEmployeesTab();
             populateManualEmpSelect();
         }
@@ -575,70 +608,140 @@
         }
 
         // ============================================
-        // TAB: SAUVEGARDE
+        // TAB: BALANCE ANNUELLE
         // ============================================
-        function exportBackup() {
-            const data = Storage.exportAll();
-            const blob = new Blob([data], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'pointage_backup_' + todayStr() + '.json';
-            a.click();
-            URL.revokeObjectURL(url);
+        function populateBalanceSelects() {
+            const yearSel = document.getElementById('balanceYear');
+            if (!yearSel) return;
+            const cy = new Date().getFullYear();
+            yearSel.innerHTML = '';
+            for (let y = cy; y >= cy - 2; y--) { const o = document.createElement('option'); o.value = y; o.textContent = y; yearSel.appendChild(o); }
+            const empSel = document.getElementById('balanceEmployee');
+            empSel.innerHTML = '<option value="all">Tous les employes</option>';
+            Storage.getEmployees().forEach(e => { const o = document.createElement('option'); o.value = e.id; o.textContent = e.name; empSel.appendChild(o); });
         }
 
-        function importBackup() {
-            const fileInput = document.getElementById('importFile');
-            if (!fileInput.files.length) {
-                alert('Sélectionne un fichier JSON');
-                return;
+        function loadBalanceData() {
+            const year = document.getElementById('balanceYear').value;
+            const empFilter = document.getElementById('balanceEmployee').value;
+            const container = document.getElementById('balanceContent');
+            container.innerHTML = '';
+            const employees = Storage.getEmployees();
+            const emps = empFilter === 'all' ? employees : employees.filter(e => e.id === empFilter);
+
+            if (emps.length === 0) { container.innerHTML = '<div class="empty-state">Aucun employé</div>'; return; }
+
+            emps.forEach(emp => {
+                const yearData = getYearBalance(emp.id, parseInt(year));
+                let html = '<div class="balance-employee-card"><h3 style="color:var(--chocolate);margin-bottom:12px;">' + emp.name + ' — ' + year + '</h3>';
+                if (yearData.monthDetails.length === 0) {
+                    html += '<div class="empty-state">Aucune donnée</div>';
+                } else {
+                    html += '<table class="data-table"><thead><tr><th>Mois</th><th>%</th><th>Heures dues</th><th>Travaillées</th><th>Balance</th><th>Cumul</th></tr></thead><tbody>';
+                    yearData.monthDetails.forEach(md => {
+                        const pct = Storage.getContract(emp.id, md.yearMonth);
+                        const bCls = md.balance >= 0 ? 'balance-positive' : 'balance-negative';
+                        const cCls = md.cumBalance >= 0 ? 'balance-positive' : 'balance-negative';
+                        html += '<tr' + (md.worked > 0 ? '' : ' style="opacity:0.5;"') + '>' +
+                            '<td>' + monthNameFr(md.yearMonth) + '</td><td>' + pct + '%</td><td>' + formatHours(md.target) + '</td>' +
+                            '<td>' + (md.worked > 0 ? formatHours(md.worked) : '-') + '</td>' +
+                            '<td><strong class="' + bCls + '">' + formatBalance(md.balance) + '</strong></td>' +
+                            '<td><strong class="' + cCls + '">' + formatBalance(md.cumBalance) + '</strong></td></tr>';
+                    });
+                    html += '</tbody></table>';
+                    const cumCls = yearData.cumBalance >= 0 ? 'balance-positive' : 'balance-negative';
+                    html += '<div class="balance-total ' + cumCls + '" style="margin-top:12px;padding:14px 20px;border-radius:10px;text-align:center;font-size:1.1em;">' +
+                        '<strong>Balance cumulative ' + year + ' : ' + formatBalance(yearData.cumBalance) + '</strong></div>';
+                }
+                html += '</div>';
+                container.innerHTML += html;
+            });
+        }
+
+        // ============================================
+        // TAB: JOURS FÉRIÉS
+        // ============================================
+        function loadHolidaysTab() {
+            const holidays = Storage.getHolidays();
+            const tbody = document.getElementById('holidayTableBody');
+            tbody.innerHTML = '';
+
+            if (holidays.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Aucun jour férié configuré</td></tr>';
+            } else {
+                holidays.forEach(h => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML =
+                        '<td>' + h.date + '</td>' +
+                        '<td>' + formatDateDisplay(h.date) + '</td>' +
+                        '<td>' + escapeHtml(h.name) + '</td>' +
+                        '<td class="actions"><button class="btn btn-danger btn-small" onclick="removeHoliday(\'' + h.date + '\')">Supprimer</button></td>';
+                    tbody.appendChild(tr);
+                });
             }
 
-            if (!confirm('Attention : ça va remplacer toutes les données actuelles. Continuer?')) return;
+            // Stats: jours ouvrés par mois
+            const stats = document.getElementById('holidayStats');
+            const ym = currentMonthStr();
+            const workDays = getWorkingDaysInMonth(ym);
+            const elapsed = getWorkingDaysElapsed(ym);
+            stats.innerHTML = '<div class="manual-form"><h3>Info mois en cours (' + monthNameFr(ym) + ')</h3>' +
+                '<p style="margin-top:8px;color:var(--text);">' + workDays + ' jours ouvrés ce mois (hors week-ends et fériés)</p>' +
+                '<p style="color:var(--text-muted);">' + elapsed + ' jours ouvrés écoulés</p></div>';
+        }
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    Storage.importAll(e.target.result);
-                    alert('Données restaurées avec succès!');
-                    initAdmin();
-                } catch (err) {
-                    alert('Erreur : fichier invalide');
-                }
-            };
-            reader.readAsText(fileInput.files[0]);
+        function addHoliday() {
+            const date = document.getElementById('holidayDate').value;
+            const name = document.getElementById('holidayName').value.trim();
+            if (!date || !name) { alert('Remplis la date et le nom'); return; }
+            if (!Storage.addHoliday(date, name)) { alert('Ce jour est déjà configuré'); return; }
+            document.getElementById('holidayDate').value = '';
+            document.getElementById('holidayName').value = '';
+            loadHolidaysTab();
+        }
+
+        function removeHoliday(date) {
+            if (!confirm('Supprimer ce jour férié?')) return;
+            Storage.removeHoliday(date);
+            loadHolidaysTab();
+        }
+
+        function addDefaultHolidays() {
+            const defaults = [
+                { date: '2026-01-01', name: 'Jour de l\'An' },
+                { date: '2026-01-02', name: 'Lendemain du Jour de l\'An' },
+                { date: '2026-04-03', name: 'Vendredi saint' },
+                { date: '2026-04-06', name: 'Lundi de Pâques' },
+                { date: '2026-05-18', name: 'Journée nationale des patriotes' },
+                { date: '2026-06-24', name: 'Fête nationale du Québec' },
+                { date: '2026-07-01', name: 'Fête du Canada' },
+                { date: '2026-09-07', name: 'Fête du Travail' },
+                { date: '2026-10-12', name: 'Action de grâce' },
+                { date: '2026-12-25', name: 'Noël' },
+                { date: '2026-12-26', name: 'Lendemain de Noël' }
+            ];
+            let added = 0;
+            defaults.forEach(h => { if (Storage.addHoliday(h.date, h.name)) added++; });
+            alert(added + ' jour(s) férié(s) ajouté(s)');
+            loadHolidaysTab();
         }
 
         // ============================================
-        // CONTRATS (pourcentage de travail)
+        // CONTRATS
         // ============================================
         function populateContractEmpSelect() {
             const sel = document.getElementById('contractEmp');
             if (!sel) return;
             sel.innerHTML = '';
-            Storage.getEmployees().forEach(e => {
-                const opt = document.createElement('option');
-                opt.value = e.id;
-                opt.textContent = e.name;
-                sel.appendChild(opt);
-            });
+            Storage.getEmployees().forEach(e => { const o = document.createElement('option'); o.value = e.id; o.textContent = e.name; sel.appendChild(o); });
         }
 
         function saveContract() {
             const empId = document.getElementById('contractEmp').value;
             const yearMonth = document.getElementById('contractMonth').value;
             const pct = parseInt(document.getElementById('contractPct').value);
-
-            if (!empId || !yearMonth) {
-                alert('Remplis tous les champs');
-                return;
-            }
-            if (isNaN(pct) || pct < 0 || pct > 100) {
-                alert('Le pourcentage doit etre entre 0 et 100');
-                return;
-            }
-
+            if (!empId || !yearMonth) { alert('Remplis tous les champs'); return; }
+            if (isNaN(pct) || pct < 0 || pct > 100) { alert('Pourcentage entre 0 et 100'); return; }
             Storage.setContract(empId, yearMonth, pct);
             loadContractsTable();
             loadEmployeesTab();
@@ -648,30 +751,20 @@
             const tbody = document.getElementById('contractTableBody');
             if (!tbody) return;
             tbody.innerHTML = '';
-
             const contracts = Storage.getContracts();
             const employees = Storage.getEmployees();
 
             if (contracts.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Aucun contrat configure — tous les employes sont a 100% (182h) par defaut</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Tous à 100% (182h) par défaut</td></tr>';
                 return;
             }
-
-            // Trier par mois desc puis par nom
-            const sorted = [...contracts].sort((a, b) => {
-                if (b.yearMonth !== a.yearMonth) return b.yearMonth.localeCompare(a.yearMonth);
-                return a.employeeId.localeCompare(b.employeeId);
-            });
-
-            sorted.forEach(c => {
+            [...contracts].sort((a, b) => b.yearMonth !== a.yearMonth ? b.yearMonth.localeCompare(a.yearMonth) : a.employeeId.localeCompare(b.employeeId))
+            .forEach(c => {
                 const emp = employees.find(e => e.id === c.employeeId);
-                const empName = emp ? emp.name : '(supprime)';
                 const target = CONTRACT_BASE_HOURS * (c.percentage / 100);
                 const tr = document.createElement('tr');
                 tr.innerHTML =
-                    '<td>' + empName + '</td>' +
-                    '<td>' + monthNameFr(c.yearMonth) + '</td>' +
-                    '<td><strong>' + c.percentage + '%</strong></td>' +
+                    '<td>' + (emp ? emp.name : '(supprimé)') + '</td><td>' + monthNameFr(c.yearMonth) + '</td><td><strong>' + c.percentage + '%</strong></td>' +
                     '<td>' + formatHours(target) + '</td>' +
                     '<td class="actions"><button class="btn btn-danger btn-small" onclick="deleteContract(\'' + c.employeeId + '\', \'' + c.yearMonth + '\')">Supprimer</button></td>';
                 tbody.appendChild(tr);
@@ -679,165 +772,65 @@
         }
 
         function deleteContract(empId, yearMonth) {
-            if (!confirm('Remettre cet employe a 100% pour ce mois?')) return;
-            const contracts = Storage.getContracts().filter(c => !(c.employeeId === empId && c.yearMonth === yearMonth));
-            Storage.saveContracts(contracts);
+            if (!confirm('Remettre à 100%?')) return;
+            Storage.saveContracts(Storage.getContracts().filter(c => !(c.employeeId === empId && c.yearMonth === yearMonth)));
             loadContractsTable();
             loadEmployeesTab();
         }
 
         // ============================================
-        // TAB: BALANCE ANNUELLE
+        // SAUVEGARDE
         // ============================================
-        function populateBalanceSelects() {
-            // Annee
-            const yearSel = document.getElementById('balanceYear');
-            if (!yearSel) return;
-            const currentYear = new Date().getFullYear();
-            yearSel.innerHTML = '';
-            for (let y = currentYear; y >= currentYear - 2; y--) {
-                const opt = document.createElement('option');
-                opt.value = y;
-                opt.textContent = y;
-                yearSel.appendChild(opt);
-            }
-
-            // Employes
-            const empSel = document.getElementById('balanceEmployee');
-            empSel.innerHTML = '<option value="all">Tous les employes</option>';
-            Storage.getEmployees().forEach(e => {
-                const opt = document.createElement('option');
-                opt.value = e.id;
-                opt.textContent = e.name;
-                empSel.appendChild(opt);
-            });
+        function exportBackup() {
+            const blob = new Blob([Storage.exportAll()], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'pointage_backup_' + todayStr() + '.json';
+            a.click(); URL.revokeObjectURL(url);
         }
 
-        function loadBalanceData() {
-            const year = document.getElementById('balanceYear').value;
-            const empFilter = document.getElementById('balanceEmployee').value;
-            const container = document.getElementById('balanceContent');
-            container.innerHTML = '';
-
-            const employees = Storage.getEmployees();
-            const empsToShow = empFilter === 'all' ? employees : employees.filter(e => e.id === empFilter);
-
-            if (empsToShow.length === 0) {
-                container.innerHTML = '<div class="empty-state">Aucun employe</div>';
-                return;
-            }
-
-            empsToShow.forEach(emp => {
-                const yearData = getYearBalance(emp.id, parseInt(year));
-
-                let html = '<div class="balance-employee-card">';
-                html += '<h3 style="color:var(--chocolate);margin-bottom:12px;">' + emp.name + ' — ' + year + '</h3>';
-
-                if (yearData.monthDetails.length === 0) {
-                    html += '<div class="empty-state">Aucune donnee pour cette annee</div>';
-                } else {
-                    html += '<table class="data-table"><thead><tr>';
-                    html += '<th>Mois</th><th>%</th><th>Heures dues</th><th>Heures travaillees</th><th>Balance mois</th><th>Cumul</th>';
-                    html += '</tr></thead><tbody>';
-
-                    yearData.monthDetails.forEach(md => {
-                        const pct = Storage.getContract(emp.id, md.yearMonth);
-                        const balCls = md.balance >= 0 ? 'balance-positive' : 'balance-negative';
-                        const cumCls = md.cumBalance >= 0 ? 'balance-positive' : 'balance-negative';
-                        const hasData = md.worked > 0 || md.target > 0;
-
-                        html += '<tr' + (hasData ? '' : ' style="opacity:0.5;"') + '>';
-                        html += '<td>' + monthNameFr(md.yearMonth) + '</td>';
-                        html += '<td>' + pct + '%</td>';
-                        html += '<td>' + formatHours(md.target) + '</td>';
-                        html += '<td>' + (md.worked > 0 ? formatHours(md.worked) : '-') + '</td>';
-                        html += '<td><strong class="' + balCls + '">' + formatBalance(md.balance) + '</strong></td>';
-                        html += '<td><strong class="' + cumCls + '">' + formatBalance(md.cumBalance) + '</strong></td>';
-                        html += '</tr>';
-                    });
-
-                    html += '</tbody></table>';
-
-                    // Resume annuel
-                    const cumCls = yearData.cumBalance >= 0 ? 'balance-positive' : 'balance-negative';
-                    html += '<div class="balance-total ' + cumCls + '" style="margin-top:12px;padding:14px 20px;border-radius:10px;text-align:center;font-size:1.1em;">';
-                    html += '<strong>Balance cumulative ' + year + ' : ' + formatBalance(yearData.cumBalance) + '</strong>';
-                    html += '</div>';
-                }
-
-                html += '</div>';
-                container.innerHTML += html;
-            });
+        function importBackup() {
+            const fileInput = document.getElementById('importFile');
+            if (!fileInput.files.length) { alert('Sélectionne un fichier JSON'); return; }
+            if (!confirm('Remplacer toutes les données?')) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try { Storage.importAll(e.target.result); alert('Données restaurées!'); initAdmin(); }
+                catch (err) { alert('Fichier invalide'); }
+            };
+            reader.readAsText(fileInput.files[0]);
         }
 
-        // ── GitHub Token ──
         function saveGitToken() {
-            const input = document.getElementById('githubTokenInput');
-            const token = input.value.trim();
+            const token = document.getElementById('githubTokenInput').value.trim();
             const status = document.getElementById('gitStatus');
-
-            if (!token) {
-                status.innerHTML = '<span style="color:#e53935;">Entre un token valide</span>';
-                return;
-            }
-
+            if (!token) { status.innerHTML = '<span style="color:#e53935;">Entre un token valide</span>'; return; }
             setGitHubToken(token);
-            status.innerHTML = '<span style="color:#43a047;">Token enregistré dans ce navigateur</span>';
-
-            // Tester automatiquement après enregistrement
+            status.innerHTML = '<span style="color:#43a047;">Token enregistré</span>';
             testGitSync();
         }
 
         async function testGitSync() {
             const status = document.getElementById('gitStatus');
             const token = getGitHubToken();
-
-            if (!token) {
-                status.innerHTML = '<span style="color:#e53935;">Aucun token enregistré — entre-le d\'abord</span>';
-                return;
-            }
-
-            status.innerHTML = '<span style="color:#5D4037;">Test en cours...</span>';
-
+            if (!token) { status.innerHTML = '<span style="color:#e53935;">Aucun token</span>'; return; }
+            status.innerHTML = '<span style="color:#5D4037;">Test...</span>';
             try {
-                const response = await fetch(
-                    'https://api.github.com/repos/' + GITHUB_REPO + '/contents/data.json',
-                    {
-                        headers: {
-                            'Authorization': 'Bearer ' + token,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    }
-                );
-
-                if (response.ok) {
-                    status.innerHTML = '<span style="color:#43a047;">Connexion OK — synchronisation active</span>';
-                    // Lancer un sync complet
-                    await GitSync.init();
-                } else if (response.status === 401) {
-                    status.innerHTML = '<span style="color:#e53935;">Token invalide ou révoqué</span>';
-                } else if (response.status === 404) {
-                    status.innerHTML = '<span style="color:#43a047;">Connexion OK — premier sync créera le fichier</span>';
-                    await GitSync.init();
-                } else {
-                    status.innerHTML = '<span style="color:#e53935;">Erreur ' + response.status + '</span>';
-                }
-            } catch (err) {
-                status.innerHTML = '<span style="color:#e53935;">Erreur réseau — vérifie ta connexion</span>';
-            }
+                const r = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/contents/data.json', {
+                    headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github.v3+json' }
+                });
+                if (r.ok) { status.innerHTML = '<span style="color:#43a047;">Connexion OK</span>'; await GitSync.init(); }
+                else if (r.status === 401) status.innerHTML = '<span style="color:#e53935;">Token invalide</span>';
+                else if (r.status === 404) { status.innerHTML = '<span style="color:#43a047;">OK — premier sync créera le fichier</span>'; await GitSync.init(); }
+                else status.innerHTML = '<span style="color:#e53935;">Erreur ' + r.status + '</span>';
+            } catch (err) { status.innerHTML = '<span style="color:#e53935;">Erreur réseau</span>'; }
         }
 
         function loadBackupTab() {
-            // Pré-remplir le champ token si déjà enregistré
             const token = getGitHubToken();
-            if (token) {
-                document.getElementById('githubTokenInput').value = token;
-            }
+            if (token) document.getElementById('githubTokenInput').value = token;
         }
 
-        // ============================================
         // INIT
-        // ============================================
         document.getElementById('loginPwd').focus();
     </script>
 </body>
