@@ -159,10 +159,6 @@
       "name": "Fête nationale du Québec"
     },
     {
-      "date": "2026-07-01",
-      "name": "Fête du Canada"
-    },
-    {
       "date": "2026-08-01",
       "name": "Fête nationale"
     },
@@ -179,5 +175,5 @@
       "name": "Lendemain de Noël"
     }
   ],
-  "exportDate": "2026-03-24T23:21:48.441Z"
+  "exportDate": "2026-03-24T23:21:53.453Z"
 }
