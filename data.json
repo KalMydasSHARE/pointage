@@ -84,6 +84,15 @@
       "date": "2026-03-24",
       "time": "22:16",
       "timestamp": "2026-03-24T22:16:00"
+    },
+    {
+      "id": "t_1774392363208_zolk",
+      "employeeId": "emp_1774386874210_i034",
+      "employeeName": "Dylan",
+      "type": "SORTIE",
+      "date": "2026-03-24",
+      "time": "23:46",
+      "timestamp": "2026-03-24T23:46:00"
     }
   ],
   "contracts": [
@@ -93,5 +102,5 @@
       "percentage": 60
     }
   ],
-  "exportDate": "2026-03-24T21:16:31.303Z"
+  "exportDate": "2026-03-24T22:46:03.208Z"
 }
