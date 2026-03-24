@@ -32,13 +32,29 @@ const Storage = {
         GitSync.push(); // sync auto
     },
 
-    addEmployee(name) {
+    addEmployee(name, workPct) {
         const employees = this.getEmployees();
         const id = 'emp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
-        employees.push({ id, name });
+        const pct = (workPct !== undefined && workPct >= 0 && workPct <= 100) ? workPct : 100;
+        employees.push({ id, name, workPct: pct });
         localStorage.setItem('pointage_employees', JSON.stringify(employees));
         GitSync.push();
-        return { id, name };
+        return { id, name, workPct: pct };
+    },
+
+    updateEmployeePct(id, pct) {
+        const employees = this.getEmployees();
+        const emp = employees.find(e => e.id === id);
+        if (emp) {
+            emp.workPct = pct;
+            localStorage.setItem('pointage_employees', JSON.stringify(employees));
+            GitSync.push();
+        }
+    },
+
+    getEmployeePct(id) {
+        const emp = this.getEmployeeById(id);
+        return (emp && emp.workPct !== undefined) ? emp.workPct : 100;
     },
 
     deleteEmployee(id) {
@@ -102,39 +118,32 @@ const Storage = {
             .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
     },
 
-    // ── Contrats (pourcentage de travail) ──
-    getContracts() {
-        return JSON.parse(localStorage.getItem('pointage_contracts') || '[]');
+    // ── Jours feries ──
+    getHolidays() {
+        return JSON.parse(localStorage.getItem('pointage_holidays') || '[]');
     },
 
-    saveContracts(contracts) {
-        localStorage.setItem('pointage_contracts', JSON.stringify(contracts));
+    addHoliday(date, hours, label) {
+        const holidays = this.getHolidays();
+        const id = 'hol_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+        holidays.push({ id, date, hours, label: label || 'Ferie' });
+        localStorage.setItem('pointage_holidays', JSON.stringify(holidays));
+        GitSync.push();
+        return { id, date, hours, label };
+    },
+
+    deleteHoliday(id) {
+        const holidays = this.getHolidays().filter(h => h.id !== id);
+        localStorage.setItem('pointage_holidays', JSON.stringify(holidays));
         GitSync.push();
     },
 
-    // Définir le % de travail d'un employé pour un mois donné (yearMonth = "2026-03")
-    setContract(employeeId, yearMonth, percentage) {
-        const contracts = this.getContracts();
-        const idx = contracts.findIndex(c => c.employeeId === employeeId && c.yearMonth === yearMonth);
-        if (idx >= 0) {
-            contracts[idx].percentage = percentage;
-        } else {
-            contracts.push({ employeeId, yearMonth, percentage });
-        }
-        localStorage.setItem('pointage_contracts', JSON.stringify(contracts));
-        GitSync.push();
+    getHolidayByDate(date) {
+        return this.getHolidays().find(h => h.date === date) || null;
     },
 
-    // Récupérer le % de travail d'un employé pour un mois (défaut: 100%)
-    getContract(employeeId, yearMonth) {
-        const contracts = this.getContracts();
-        const found = contracts.find(c => c.employeeId === employeeId && c.yearMonth === yearMonth);
-        return found ? found.percentage : 100;
-    },
-
-    // Récupérer tous les contrats d'un employé (pour vue annuelle)
-    getContractsByEmployee(employeeId) {
-        return this.getContracts().filter(c => c.employeeId === employeeId);
+    getHolidaysByMonth(yearMonth) {
+        return this.getHolidays().filter(h => h.date.startsWith(yearMonth));
     },
 
     // ── Export / Import ──
@@ -142,7 +151,7 @@ const Storage = {
         return JSON.stringify({
             employees: this.getEmployees(),
             timbrages: this.getTimbrages(),
-            contracts: this.getContracts(),
+            holidays: this.getHolidays(),
             exportDate: new Date().toISOString()
         }, null, 2);
     },
@@ -151,7 +160,7 @@ const Storage = {
         const data = JSON.parse(jsonString);
         if (data.employees) localStorage.setItem('pointage_employees', JSON.stringify(data.employees));
         if (data.timbrages) localStorage.setItem('pointage_timbrages', JSON.stringify(data.timbrages));
-        if (data.contracts) localStorage.setItem('pointage_contracts', JSON.stringify(data.contracts));
+        if (data.holidays) localStorage.setItem('pointage_holidays', JSON.stringify(data.holidays));
     }
 };
 
@@ -375,34 +384,64 @@ function formatDateDisplay(dateStr) {
 // ============================================
 // CALCUL HEURES CONTRACTUELLES
 // ============================================
-const CONTRACT_BASE_HOURS = 182; // heures pour 100%
+const CONTRACT_BASE_HOURS = 182; // heures par mois pour 100%
 
-// Heures dues pour un mois selon le pourcentage de travail
-function getTargetHours(employeeId, yearMonth) {
-    const pct = Storage.getContract(employeeId, yearMonth);
+// Heures dues pour un mois selon le % fixe de l'employe
+function getTargetHours(employeeId) {
+    const pct = Storage.getEmployeePct(employeeId);
     return CONTRACT_BASE_HOURS * (pct / 100);
-}
-
-// Balance = heures travaillées - heures dues
-function calculateMonthBalance(workedHours, employeeId, yearMonth) {
-    const target = getTargetHours(employeeId, yearMonth);
-    return workedHours - target;
 }
 
 // Formater la balance avec signe + ou -
 function formatBalance(balance) {
-    const sign = balance >= 0 ? '+' : '';
-    const h = Math.floor(Math.abs(balance));
-    const m = Math.round((Math.abs(balance) - h) * 60);
-    return sign + (balance < 0 ? '-' : '') + h + 'h ' + String(m).padStart(2, '0') + 'min';
+    const abs = Math.abs(balance);
+    const h = Math.floor(abs);
+    const m = Math.round((abs - h) * 60);
+    const prefix = balance >= 0 ? '+' : '-';
+    return prefix + h + 'h ' + String(m).padStart(2, '0') + 'min';
 }
 
-// Calculer les heures travaillées pour un employé sur un mois
+// Calculer les heures travaillees pour un employe sur un mois (timbrages + feries)
 function getWorkedHoursForMonth(employeeId, yearMonth) {
     const timbrages = Storage.getTimbragesByMonth(yearMonth)
         .filter(t => t.employeeId === employeeId);
 
-    // Grouper par date
+    const byDate = {};
+    timbrages.forEach(t => {
+        if (!byDate[t.date]) byDate[t.date] = [];
+        byDate[t.date].push(t);
+    });
+
+    let totalHours = 0;
+
+    // Heures des timbrages
+    Object.keys(byDate).forEach(date => {
+        const dayTimbrages = byDate[date];
+        let currentEntry = null;
+        dayTimbrages.forEach(t => {
+            if (t.type === 'ENTRÉE') {
+                currentEntry = t;
+            } else if (t.type === 'SORTIE' && currentEntry) {
+                totalHours += calculateHours(currentEntry.time, t.time, date);
+                currentEntry = null;
+            }
+        });
+    });
+
+    // Ajouter les heures des jours feries
+    const holidays = Storage.getHolidaysByMonth(yearMonth);
+    holidays.forEach(h => {
+        totalHours += h.hours;
+    });
+
+    return totalHours;
+}
+
+// Calculer les heures d'un employe sur un mois SANS les feries (pour separer dans le rapport)
+function getTimbragedHoursForMonth(employeeId, yearMonth) {
+    const timbrages = Storage.getTimbragesByMonth(yearMonth)
+        .filter(t => t.employeeId === employeeId);
+
     const byDate = {};
     timbrages.forEach(t => {
         if (!byDate[t.date]) byDate[t.date] = [];
@@ -426,33 +465,10 @@ function getWorkedHoursForMonth(employeeId, yearMonth) {
     return totalHours;
 }
 
-// Calculer la balance annuelle cumulée (tous les mois de l'année)
-function getYearBalance(employeeId, year) {
-    let cumBalance = 0;
-    const monthDetails = [];
-
-    for (let m = 1; m <= 12; m++) {
-        const ym = year + '-' + String(m).padStart(2, '0');
-        const worked = getWorkedHoursForMonth(employeeId, ym);
-        const target = getTargetHours(employeeId, ym);
-        const balance = worked - target;
-
-        // Ne compter que les mois passés ou en cours
-        const now = new Date();
-        const monthDate = new Date(year, m - 1, 1);
-        if (monthDate <= now) {
-            cumBalance += balance;
-            monthDetails.push({ yearMonth: ym, worked, target, balance, cumBalance });
-        }
-    }
-
-    return { cumBalance, monthDetails };
-}
-
-// Nom du mois en français
+// Nom du mois en francais
 function monthNameFr(yearMonth) {
-    const mois = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-                  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    const mois = ['Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin',
+                  'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre'];
     const parts = yearMonth.split('-');
     return mois[parseInt(parts[1]) - 1] + ' ' + parts[0];
 }

@@ -193,26 +193,16 @@
 
             const ym = currentMonthStr();
             const worked = getWorkedHoursForMonth(selectedEmpId, ym);
-            const pct = Storage.getContract(selectedEmpId, ym);
+            const pct = Storage.getEmployeePct(selectedEmpId);
             const target = CONTRACT_BASE_HOURS * (pct / 100);
             const balance = worked - target;
             const balCls = balance >= 0 ? 'balance-positive' : 'balance-negative';
-
-            // Cumul annuel
-            const year = new Date().getFullYear();
-            const yearData = getYearBalance(selectedEmpId, year);
-            const cumCls = yearData.cumBalance >= 0 ? 'balance-positive' : 'balance-negative';
 
             balanceContent.innerHTML =
                 '<div class="balance-row">' +
                     '<span>Ce mois (' + pct + '%) :</span>' +
                     '<span>' + formatHours(worked) + ' / ' + formatHours(target) + '</span>' +
                     '<strong class="' + balCls + '">' + formatBalance(balance) + '</strong>' +
-                '</div>' +
-                '<div class="balance-row">' +
-                    '<span>Cumul ' + year + ' :</span>' +
-                    '<span></span>' +
-                    '<strong class="' + cumCls + '">' + formatBalance(yearData.cumBalance) + '</strong>' +
                 '</div>';
 
             balanceSection.style.display = 'block';
