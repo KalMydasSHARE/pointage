@@ -113,6 +113,17 @@
       "timestamp": "2026-03-24T23:53:00",
       "source": "system",
       "remark": ""
+    },
+    {
+      "id": "t_1774394166806_7fvv",
+      "employeeId": "emp_1774308350085_4cl7",
+      "employeeName": "Stéphanie",
+      "type": "ENTRÉE",
+      "date": "2026-03-25",
+      "time": "00:16",
+      "timestamp": "2026-03-25T00:16:00",
+      "source": "system",
+      "remark": ""
     }
   ],
   "contracts": [
@@ -123,5 +134,5 @@
     }
   ],
   "holidays": [],
-  "exportDate": "2026-03-24T22:53:40.639Z"
+  "exportDate": "2026-03-24T23:16:06.806Z"
 }
