@@ -171,10 +171,6 @@
       "name": "Fête du Travail"
     },
     {
-      "date": "2026-10-12",
-      "name": "Action de grâce"
-    },
-    {
       "date": "2026-12-25",
       "name": "Noël"
     },
@@ -183,5 +179,5 @@
       "name": "Lendemain de Noël"
     }
   ],
-  "exportDate": "2026-03-24T23:21:44.771Z"
+  "exportDate": "2026-03-24T23:21:48.441Z"
 }
