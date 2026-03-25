@@ -110,6 +110,17 @@
       "timestamp": "2026-03-25T18:03:00",
       "source": "system",
       "remark": ""
+    },
+    {
+      "id": "t_1774466956081_zg76",
+      "employeeId": "emp_1774386874210_i034",
+      "employeeName": "Dylan",
+      "type": "ENTRÉE",
+      "date": "2026-03-25",
+      "time": "20:29",
+      "timestamp": "2026-03-25T20:29:00",
+      "source": "system",
+      "remark": ""
     }
   ],
   "rates": {
@@ -167,5 +178,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-25T17:03:29.598Z"
+  "exportDate": "2026-03-25T19:29:16.081Z"
 }
