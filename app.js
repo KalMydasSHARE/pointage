@@ -292,10 +292,15 @@ const GitSync = {
                 this._sha = result.sha;
                 const content = decodeURIComponent(escape(atob(result.content)));
                 const data = JSON.parse(content);
-                if ((data.timbrages || []).length > Storage.getTimbrages().length) {
+                // Comparer par date d'export: si remote est plus récent, on importe tout
+                const remoteDate = data.exportDate || '';
+                const localDate = JSON.parse(Storage.exportAll()).exportDate || '';
+                const remoteTimbrages = (data.timbrages || []).length;
+                const localTimbrages = Storage.getTimbrages().length;
+                if (remoteDate > localDate || remoteTimbrages > localTimbrages) {
                     Storage.importAll(content);
                     this._updateIndicator('ok');
-                    console.log('GitHub pull: données mises à jour');
+                    console.log('GitHub pull: données mises à jour (remote:', remoteDate, 'local:', localDate, ')');
                     return true;
                 }
                 this._updateIndicator('ok');
