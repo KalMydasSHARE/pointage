@@ -113,17 +113,6 @@
       "timestamp": "2026-03-24T23:53:00",
       "source": "system",
       "remark": ""
-    },
-    {
-      "id": "t_1774394166806_7fvv",
-      "employeeId": "emp_1774308350085_4cl7",
-      "employeeName": "Stéphanie",
-      "type": "ENTRÉE",
-      "date": "2026-03-25",
-      "time": "00:16",
-      "timestamp": "2026-03-25T00:16:00",
-      "source": "system",
-      "remark": ""
     }
   ],
   "rates": {
@@ -180,5 +169,5 @@
       "employeeHours": {}
     }
   ],
-  "exportDate": "2026-03-25T01:04:15.604Z"
+  "exportDate": "2026-03-25T01:04:17.336Z"
 }
