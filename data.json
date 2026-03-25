@@ -11,6 +11,10 @@
     {
       "id": "emp_1774400602166_6mej",
       "name": "Stéphanie"
+    },
+    {
+      "id": "emp_1774400606459_68q9",
+      "name": "Thomas"
     }
   ],
   "timbrages": [
@@ -181,5 +185,5 @@
       "employeeHours": {}
     }
   ],
-  "exportDate": "2026-03-25T01:03:22.166Z"
+  "exportDate": "2026-03-25T01:03:26.460Z"
 }
