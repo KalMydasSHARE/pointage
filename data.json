@@ -124,17 +124,6 @@
       "timestamp": "2026-03-25T00:16:00",
       "source": "system",
       "remark": ""
-    },
-    {
-      "id": "t_1774400354133_vhq5",
-      "employeeId": "emp_1774308344339_f6c6",
-      "employeeName": "Ethan",
-      "type": "SORTIE",
-      "date": "2026-03-25",
-      "time": "01:59",
-      "timestamp": "2026-03-25T01:59:00",
-      "source": "system",
-      "remark": ""
     }
   ],
   "rates": {
@@ -191,5 +180,5 @@
       "employeeHours": {}
     }
   ],
-  "exportDate": "2026-03-25T01:03:51.282Z"
+  "exportDate": "2026-03-25T01:04:15.604Z"
 }
