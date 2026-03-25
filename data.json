@@ -23,15 +23,6 @@
   ],
   "timbrages": [
     {
-      "id": "t_1774386991302_12ln",
-      "employeeId": "emp_1774386874210_i034",
-      "employeeName": "Dylan",
-      "type": "ENTRÉE",
-      "date": "2026-03-24",
-      "time": "22:16",
-      "timestamp": "2026-03-24T22:16:00"
-    },
-    {
       "id": "t_1774392363208_zolk",
       "employeeId": "emp_1774386874210_i034",
       "employeeName": "Dylan",
@@ -124,5 +115,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-25T02:22:30.254Z"
+  "exportDate": "2026-03-25T02:22:30.919Z"
 }
