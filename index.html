@@ -7,7 +7,25 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Pointage</title>
-    <link rel="stylesheet" href="styles.css?v=9">
+    <link rel="stylesheet" href="styles.css?v=10">
+    <script>
+    // Auto-updater: vérifie si une nouvelle version du HTML existe sur le serveur
+    // Si oui, force un rechargement. Empêche les boucles avec sessionStorage.
+    (function(){
+        var CURRENT_VERSION = '10';
+        var reloadKey = 'pointage_reload_v' + CURRENT_VERSION;
+        if (sessionStorage.getItem(reloadKey)) return; // déjà rechargé cette session
+        fetch(location.pathname + '?_vc=' + Date.now(), {cache:'no-store'})
+        .then(function(r){return r.text()})
+        .then(function(html){
+            var m = html.match(/CURRENT_VERSION\s*=\s*'(\d+)'/);
+            if(m && m[1] !== CURRENT_VERSION){
+                sessionStorage.setItem('pointage_reload_v'+m[1],'1');
+                location.reload(true);
+            }
+        }).catch(function(){});
+    })();
+    </script>
 </head>
 <body>
     <div class="page-wrapper">
@@ -72,7 +90,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=9"></script>
+    <script src="app.js?v=10"></script>
     <script>
         const empSelect = document.getElementById('empSelect');
         const timbrBtn = document.getElementById('timbrBtn');
