@@ -50,15 +50,6 @@
       "timestamp": "2026-03-24T19:06:00"
     },
     {
-      "id": "t_1774375658770_u9u9",
-      "employeeId": "emp_1774308357090_qngz",
-      "employeeName": "Rachel",
-      "type": "SORTIE",
-      "date": "2026-03-23",
-      "time": "23:59",
-      "timestamp": "2026-03-23T23:59:00"
-    },
-    {
       "id": "t_1774380693153_k25a",
       "employeeId": "emp_1774308357090_qngz",
       "employeeName": "Rachel",
@@ -169,5 +160,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-25T02:22:16.260Z"
+  "exportDate": "2026-03-25T02:22:17.757Z"
 }
