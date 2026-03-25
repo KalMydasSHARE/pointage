@@ -1,79 +1,37 @@
 {
   "employees": [
     {
-      "id": "emp_1774308344339_f6c6",
+      "id": "emp_1774373902717_morq",
       "name": "Ethan"
     },
     {
-      "id": "emp_1774308350085_4cl7",
+      "id": "emp_1774373906851_nrmm",
       "name": "Stéphanie"
     },
     {
-      "id": "emp_1774308354765_8m70",
-      "name": "Thomas"
-    },
-    {
-      "id": "emp_1774308357090_qngz",
+      "id": "emp_1774373909898_pusd",
       "name": "Rachel"
     },
     {
-      "id": "emp_1774386874210_i034",
-      "name": "Dylan"
+      "id": "emp_1774373918324_11in",
+      "name": "Thomas"
     }
   ],
   "timbrages": [
     {
-      "id": "t_1774403394917_zask",
-      "employeeId": "emp_1774386874210_i034",
-      "employeeName": "Dylan",
+      "id": "t_1774373930670_fxri",
+      "employeeId": "emp_1774373909898_pusd",
+      "employeeName": "Rachel",
       "type": "ENTRÉE",
-      "date": "2026-03-25",
-      "time": "02:49",
-      "timestamp": "2026-03-25T02:49:00",
-      "source": "system",
-      "remark": ""
+      "date": "2026-03-24",
+      "time": "18:38",
+      "timestamp": "2026-03-24T18:38:00"
     }
   ],
   "rates": {
-    "emp_1774308344339_f6c6": 60,
-    "emp_1774308350085_4cl7": 100,
-    "emp_1774386874210_i034": 100,
-    "emp_1774308354765_8m70": 60
+    "emp_1774373902717_morq": 60
   },
-  "holidays": [
-    {
-      "date": "2026-01-01",
-      "name": "Jour de l'An"
-    },
-    {
-      "date": "2026-01-02",
-      "name": "Lendemain du Jour de l'An"
-    },
-    {
-      "date": "2026-04-03",
-      "name": "Vendredi saint"
-    },
-    {
-      "date": "2026-04-06",
-      "name": "Lundi de Pâques"
-    },
-    {
-      "date": "2026-08-01",
-      "name": "Fête nationale"
-    },
-    {
-      "date": "2026-09-07",
-      "name": "Fête du Travail"
-    },
-    {
-      "date": "2026-12-25",
-      "name": "Noël"
-    },
-    {
-      "date": "2026-12-26",
-      "name": "Lendemain de Noël"
-    }
-  ],
+  "holidays": [],
   "settings": {},
-  "exportDate": "2026-03-25T02:22:42.430Z"
+  "exportDate": "2026-03-25T05:50:36.369Z"
 }
