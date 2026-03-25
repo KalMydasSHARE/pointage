@@ -17,24 +17,12 @@
       "name": "Thomas"
     }
   ],
-  "timbrages": [
-    {
-      "id": "t_1774417908079_m0lk",
-      "employeeId": "emp_1774373909898_pusd",
-      "employeeName": "Rachel",
-      "type": "SORTIE",
-      "date": "2026-03-25",
-      "time": "06:51",
-      "timestamp": "2026-03-25T06:51:00",
-      "source": "system",
-      "remark": ""
-    }
-  ],
+  "timbrages": [],
   "rates": {
     "emp_1774373902717_morq": 60,
     "emp_1774373918324_11in": 60
   },
   "holidays": [],
   "settings": {},
-  "exportDate": "2026-03-25T05:57:47.181Z"
+  "exportDate": "2026-03-25T05:58:38.820Z"
 }
