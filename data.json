@@ -19,15 +19,6 @@
   ],
   "timbrages": [
     {
-      "id": "t_1774373930670_fxri",
-      "employeeId": "emp_1774373909898_pusd",
-      "employeeName": "Rachel",
-      "type": "ENTRÉE",
-      "date": "2026-03-24",
-      "time": "18:38",
-      "timestamp": "2026-03-24T18:38:00"
-    },
-    {
       "id": "t_1774417908079_m0lk",
       "employeeId": "emp_1774373909898_pusd",
       "employeeName": "Rachel",
@@ -45,5 +36,5 @@
   },
   "holidays": [],
   "settings": {},
-  "exportDate": "2026-03-25T05:51:48.080Z"
+  "exportDate": "2026-03-25T05:57:47.181Z"
 }
