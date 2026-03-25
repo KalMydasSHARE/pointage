@@ -7,12 +7,12 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Pointage</title>
-    <link rel="stylesheet" href="styles.css?v=11">
+    <link rel="stylesheet" href="styles.css?v=12">
     <script>
     // Auto-updater: vérifie si une nouvelle version du HTML existe sur le serveur
     // Si oui, force un rechargement. Empêche les boucles avec sessionStorage.
     (function(){
-        var CURRENT_VERSION = '11';
+        var CURRENT_VERSION = '12';
         var reloadKey = 'pointage_reload_v' + CURRENT_VERSION;
         if (sessionStorage.getItem(reloadKey)) return; // déjà rechargé cette session
         fetch(location.pathname + '?_vc=' + Date.now(), {cache:'no-store'})
@@ -90,7 +90,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=11"></script>
+    <script src="app.js?v=12"></script>
     <script>
         const empSelect = document.getElementById('empSelect');
         const timbrBtn = document.getElementById('timbrBtn');
@@ -216,30 +216,18 @@
 
             if (!info.hasTimbrages) {
                 balDiv.className = 'current-balance balance-zero';
-                balDiv.innerHTML = '<span class="balance-number">00:00</span><span class="balance-label">Pas encore de timbrage</span>';
+                balDiv.innerHTML = '<span class="balance-label">Balance</span><span class="balance-number">00:00</span>';
             } else {
                 const bal = info.runningBalance;
                 const isPositive = bal >= 0;
                 balDiv.className = 'current-balance ' + (isPositive ? 'balance-positive-bg' : 'balance-negative-bg');
-                balDiv.innerHTML = '<span class="balance-number">' + formatBalanceCompact(bal) + '</span>' +
-                    '<span class="balance-label">' + (isPositive ? 'en avance' : 'à rattraper') + '</span>';
+                balDiv.innerHTML = '<span class="balance-label">Balance</span>' +
+                    '<span class="balance-number">' + formatBalanceCompact(bal) + '</span>';
             }
 
-            // Résumé aujourd'hui
+            // Résumé aujourd'hui — masqué
             const todayDiv = document.getElementById('todaySummary');
-            if (info.workedToday > 0) {
-                const todayBal = info.workedToday - info.dailyTarget;
-                const todaySign = todayBal >= 0 ? '+' : '';
-                todayDiv.innerHTML =
-                    '<div class="today-line">Aujourd\'hui : <strong>' + formatHours(info.workedToday) + '</strong> / ' + formatHours(info.dailyTarget) + '</div>' +
-                    '<div class="today-line muted">Objectif mensuel : ' + formatHours(info.totalCredit) + ' / ' + formatHours(info.monthTarget) + '</div>';
-                todayDiv.style.display = 'block';
-            } else if (info.hasTimbrages) {
-                todayDiv.innerHTML = '<div class="today-line muted">Objectif mensuel : ' + formatHours(info.totalCredit) + ' / ' + formatHours(info.monthTarget) + '</div>';
-                todayDiv.style.display = 'block';
-            } else {
-                todayDiv.style.display = 'none';
-            }
+            todayDiv.style.display = 'none';
         }
 
         function toggleHistory() {
@@ -275,10 +263,9 @@
                     '<span class="' + dayBalClass + '" style="font-weight:600;">' + formatBalanceCompact(day.dayBalance) + '</span>' +
                     '<strong class="' + balClass + '">' + formatBalanceCompact(day.runningBalance) + '</strong></div>';
 
-                html += '<div class="history-day-detail">' +
-                    '<span>Travaillé: ' + formatHours(day.worked) + '</span>' +
-                    (day.holidayHours > 0 ? '<span> + ' + formatHours(day.holidayHours) + ' férié</span>' : '') +
-                    '<span> / Objectif: ' + formatHours(day.dayTarget) + '</span></div>';
+                if (day.holidayHours > 0) {
+                    html += '<div class="history-day-detail"><span>' + formatHours(day.holidayHours) + ' férié</span></div>';
+                }
 
                 html += '<div class="history-day-entries">';
                 timbrages.forEach(t => {
