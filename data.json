@@ -140,6 +140,12 @@
   "rates": {
     "emp_1774308344339_f6c6": 60
   },
-  "holidays": [],
-  "exportDate": "2026-03-25T01:00:35.260Z"
+  "holidays": [
+    {
+      "date": "2026-01-01",
+      "name": "Nouvel An",
+      "employeeHours": {}
+    }
+  ],
+  "exportDate": "2026-03-25T01:00:36.293Z"
 }
