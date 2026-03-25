@@ -88,6 +88,17 @@
       "timestamp": "2026-03-25T16:07:00",
       "source": "system",
       "remark": ""
+    },
+    {
+      "id": "t_1774451361908_gx5e",
+      "employeeId": "emp_1774386874210_i034",
+      "employeeName": "Dylan",
+      "type": "SORTIE",
+      "date": "2026-03-25",
+      "time": "16:09",
+      "timestamp": "2026-03-25T16:09:00",
+      "source": "system",
+      "remark": ""
     }
   ],
   "rates": {
@@ -145,5 +156,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-25T15:07:44.960Z"
+  "exportDate": "2026-03-25T15:09:21.908Z"
 }
