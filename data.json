@@ -39,17 +39,6 @@
       "date": "2026-03-23",
       "time": "23:59",
       "timestamp": "2026-03-23T23:59:00"
-    },
-    {
-      "id": "t_1774400726301_em0f",
-      "employeeId": "emp_1774386874210_i034",
-      "employeeName": "Dylan",
-      "type": "SORTIE",
-      "date": "2026-03-23",
-      "time": "20:00",
-      "timestamp": "2026-03-23T20:00:00",
-      "source": "admin_manual",
-      "remark": "Ajout manuel (admin)"
     }
   ],
   "rates": {
@@ -106,5 +95,5 @@
       "employeeHours": {}
     }
   ],
-  "exportDate": "2026-03-25T01:07:16.108Z"
+  "exportDate": "2026-03-25T01:07:17.160Z"
 }
