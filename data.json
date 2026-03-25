@@ -26,6 +26,17 @@
       "date": "2026-03-24",
       "time": "18:38",
       "timestamp": "2026-03-24T18:38:00"
+    },
+    {
+      "id": "t_1774417908079_m0lk",
+      "employeeId": "emp_1774373909898_pusd",
+      "employeeName": "Rachel",
+      "type": "SORTIE",
+      "date": "2026-03-25",
+      "time": "06:51",
+      "timestamp": "2026-03-25T06:51:00",
+      "source": "system",
+      "remark": ""
     }
   ],
   "rates": {
@@ -34,5 +45,5 @@
   },
   "holidays": [],
   "settings": {},
-  "exportDate": "2026-03-25T05:50:50.693Z"
+  "exportDate": "2026-03-25T05:51:48.080Z"
 }
