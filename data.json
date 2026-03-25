@@ -1,40 +1,104 @@
 {
   "employees": [
     {
-      "id": "emp_1774373902717_morq",
-      "name": "Ethan"
-    },
-    {
-      "id": "emp_1774373906851_nrmm",
-      "name": "Stéphanie"
-    },
-    {
-      "id": "emp_1774373909898_pusd",
+      "id": "emp_1774308357090_qngz",
       "name": "Rachel"
     },
     {
-      "id": "emp_1774373918324_11in",
+      "id": "emp_1774386874210_i034",
+      "name": "Dylan"
+    },
+    {
+      "id": "emp_1774400602166_6mej",
+      "name": "Stéphanie"
+    },
+    {
+      "id": "emp_1774400606459_68q9",
       "name": "Thomas"
+    },
+    {
+      "id": "emp_1774400609885_9bcs",
+      "name": "Ethan"
     }
   ],
   "timbrages": [
     {
-      "id": "t_1774431272301_kcms",
-      "employeeId": "emp_1774373909898_pusd",
-      "employeeName": "Rachel",
+      "id": "t_1774400852522_u43w",
+      "employeeId": "emp_1774386874210_i034",
+      "employeeName": "Dylan",
       "type": "ENTRÉE",
       "date": "2026-03-25",
-      "time": "10:34",
-      "timestamp": "2026-03-25T10:34:00",
+      "time": "02:07",
+      "timestamp": "2026-03-25T02:07:00",
+      "source": "system",
+      "remark": ""
+    },
+    {
+      "id": "t_1774431425415_mejc",
+      "employeeId": "emp_1774386874210_i034",
+      "employeeName": "Dylan",
+      "type": "SORTIE",
+      "date": "2026-03-25",
+      "time": "10:37",
+      "timestamp": "2026-03-25T10:37:00",
       "source": "system",
       "remark": ""
     }
   ],
   "rates": {
-    "emp_1774373902717_morq": 60,
-    "emp_1774373918324_11in": 60
+    "emp_1774308344339_f6c6": 60,
+    "emp_1774308354765_8m70": 60,
+    "emp_1774308357090_qngz": 80,
+    "emp_1774400609885_9bcs": 60,
+    "emp_1774400606459_68q9": 60
   },
-  "holidays": [],
+  "holidays": [
+    {
+      "date": "2026-01-01",
+      "name": "Nouvel An",
+      "employeeHours": {}
+    },
+    {
+      "date": "2026-01-02",
+      "name": "Saint-Berchtold",
+      "employeeHours": {}
+    },
+    {
+      "date": "2026-04-03",
+      "name": "Vendredi Saint",
+      "employeeHours": {}
+    },
+    {
+      "date": "2026-04-06",
+      "name": "Lundi de Pâques",
+      "employeeHours": {}
+    },
+    {
+      "date": "2026-05-14",
+      "name": "Ascension",
+      "employeeHours": {}
+    },
+    {
+      "date": "2026-05-25",
+      "name": "Lundi de Pentecôte",
+      "employeeHours": {}
+    },
+    {
+      "date": "2026-08-01",
+      "name": "Fête nationale suisse",
+      "employeeHours": {}
+    },
+    {
+      "date": "2026-12-25",
+      "name": "Noël",
+      "employeeHours": {}
+    },
+    {
+      "date": "2026-12-26",
+      "name": "Saint-Étienne",
+      "employeeHours": {}
+    }
+  ],
   "settings": {},
-  "exportDate": "2026-03-25T09:34:32.302Z"
+  "exportDate": "2026-03-25T09:37:05.416Z"
 }
