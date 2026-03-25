@@ -142,18 +142,6 @@
   },
   "holidays": [
     {
-      "date": "2026-01-01",
-      "name": "Jour de l'An"
-    },
-    {
-      "date": "2026-01-02",
-      "name": "Lendemain du Jour de l'An"
-    },
-    {
-      "date": "2026-04-03",
-      "name": "Vendredi saint"
-    },
-    {
       "date": "2026-04-06",
       "name": "Lundi de Pâques"
     },
@@ -170,5 +158,5 @@
       "name": "Noël"
     }
   ],
-  "exportDate": "2026-03-25T01:00:28.101Z"
+  "exportDate": "2026-03-25T01:00:32.267Z"
 }
