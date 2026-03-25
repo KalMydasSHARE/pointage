@@ -373,6 +373,33 @@ function getProratedTarget(employeeId, yearMonth) {
     if (total === 0) return 0;
     return getTargetHours(employeeId, yearMonth) * (getWorkingDaysElapsed(yearMonth) / total);
 }
+// Prorated target depuis le premier timbrage de l'employé dans le mois
+function getProratedTargetFromFirstTimbre(employeeId, yearMonth) {
+    const timbrages = Storage.getTimbragesByMonth(yearMonth).filter(t => t.employeeId === employeeId);
+    if (timbrages.length === 0) return 0; // Pas de timbrage = pas de target = balance 0
+    // Trouver la première date de timbrage
+    const firstDate = timbrages.map(t => t.date).sort()[0];
+    const firstDay = parseInt(firstDate.split('-')[2]);
+    const p = yearMonth.split('-');
+    const year = parseInt(p[0]), month = parseInt(p[1]);
+    const now = new Date();
+    let lastDay;
+    if (year === now.getFullYear() && month === now.getMonth()+1) lastDay = now.getDate();
+    else if (year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth()+1)) lastDay = getDaysInMonth(yearMonth);
+    else return 0;
+    // Compter les jours ouvrés depuis le premier timbrage jusqu'à maintenant
+    let workDaysFromStart = 0, totalWorkDaysFromStart = 0;
+    const totalDaysInMonth = getDaysInMonth(yearMonth);
+    for (let d = firstDay; d <= totalDaysInMonth; d++) {
+        const ds = yearMonth + '-' + String(d).padStart(2,'0');
+        if (isWorkingDay(ds)) {
+            totalWorkDaysFromStart++;
+            if (d <= lastDay) workDaysFromStart++;
+        }
+    }
+    if (totalWorkDaysFromStart === 0) return 0;
+    return getTargetHours(employeeId, yearMonth) * (workDaysFromStart / getWorkingDaysInMonth(yearMonth));
+}
 function getDailyTarget(employeeId, yearMonth) {
     const wd = getWorkingDaysInMonth(yearMonth);
     return wd > 0 ? getTargetHours(employeeId, yearMonth) / wd : 0;
@@ -422,13 +449,15 @@ function getEmployeeMonthInfo(employeeId) {
     const holidayHours = getHolidayHoursForMonth(employeeId, ym);
     const totalCredit = worked + holidayHours;
     const remaining = Math.max(0, monthTarget - totalCredit);
-    const proratedTarget = getProratedTarget(employeeId, ym);
+    // Balance calculée depuis le premier timbrage (pas avant = pas de négatif)
+    const proratedTarget = getProratedTargetFromFirstTimbre(employeeId, ym);
     const proratedBalance = totalCredit - proratedTarget;
     const workedToday = getWorkedHoursForDay(employeeId, todayStr());
     const dailyTarget = getDailyTarget(employeeId, ym);
     const progressPct = monthTarget > 0 ? Math.min(100, Math.round((totalCredit / monthTarget) * 100)) : 0;
+    const hasTimbrages = Storage.getTimbragesByMonth(ym).some(t => t.employeeId === employeeId);
     return { ym, pct, monthTarget, worked, holidayHours, totalCredit, remaining, proratedTarget, proratedBalance, workedToday, dailyTarget, progressPct,
-             totalWorkDays: getWorkingDaysInMonth(ym), elapsedWorkDays: getWorkingDaysElapsed(ym) };
+             totalWorkDays: getWorkingDaysInMonth(ym), elapsedWorkDays: getWorkingDaysElapsed(ym), hasTimbrages };
 }
 
 // Balance annuelle jour par jour (pas de gros négatif au départ)
@@ -444,13 +473,13 @@ function getYearBalance(employeeId, year) {
         const holidayHours = getHolidayHoursForMonth(employeeId, ym);
         const totalCredit = worked + holidayHours;
 
-        // Balance proratisée: seulement les jours ouvrés écoulés comptent
-        const proratedTarget = getProratedTarget(employeeId, ym);
+        // Balance proratisée depuis le premier timbrage (pas de négatif si aucun timbrage)
+        const proratedTarget = getProratedTargetFromFirstTimbre(employeeId, ym);
         const bal = totalCredit - proratedTarget;
 
-        // Ne montrer que si l'employé a des données OU c'est le mois courant
-        const isCurrent = (year === now.getFullYear() && m === now.getMonth()+1);
-        if (totalCredit > 0 || isCurrent) {
+        // Ne montrer que si l'employé a des timbrages ou des heures fériées
+        const hasData = totalCredit > 0 || Storage.getTimbragesByMonth(ym).some(t => t.employeeId === employeeId);
+        if (hasData) {
             cum += bal;
             details.push({
                 yearMonth: ym,
