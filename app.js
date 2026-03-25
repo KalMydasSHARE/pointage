@@ -50,20 +50,20 @@ const Storage = {
     },
     saveEmployees(employees) {
         localStorage.setItem('pointage_employees', JSON.stringify(employees));
-        GitSync.push();
+        this.touchModified(); GitSync.push();
     },
     addEmployee(name) {
         const employees = this.getEmployees();
         const id = 'emp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
         employees.push({ id, name });
         localStorage.setItem('pointage_employees', JSON.stringify(employees));
-        GitSync.push();
+        this.touchModified(); GitSync.push();
         return { id, name };
     },
     deleteEmployee(id) {
         const employees = this.getEmployees().filter(e => e.id !== id);
         localStorage.setItem('pointage_employees', JSON.stringify(employees));
-        GitSync.push();
+        this.touchModified(); GitSync.push();
     },
     getEmployeeById(id) {
         return this.getEmployees().find(e => e.id === id) || null;
@@ -75,7 +75,7 @@ const Storage = {
     },
     saveTimbrages(timbrages) {
         localStorage.setItem('pointage_timbrages', JSON.stringify(timbrages));
-        GitSync.push();
+        this.touchModified(); GitSync.push();
     },
     addTimbre(employeeId, employeeName, type, date, time, source, remark) {
         source = source || 'system';
@@ -87,7 +87,7 @@ const Storage = {
         const timestamp = date + 'T' + time + ':00';
         timbrages.push({ id, employeeId, employeeName, type, date, time, timestamp, source, remark });
         localStorage.setItem('pointage_timbrages', JSON.stringify(timbrages));
-        GitSync.push();
+        this.touchModified(); GitSync.push();
         return { id, employeeId, employeeName, type, date, time, timestamp, source, remark };
     },
     editTimbre(id, updates) {
@@ -121,13 +121,13 @@ const Storage = {
         timbrages[idx].editedAt = new Date().toISOString();
 
         localStorage.setItem('pointage_timbrages', JSON.stringify(timbrages));
-        GitSync.push();
+        this.touchModified(); GitSync.push();
         return timbrages[idx];
     },
     deleteTimbre(id) {
         const timbrages = this.getTimbrages().filter(t => t.id !== id);
         localStorage.setItem('pointage_timbrages', JSON.stringify(timbrages));
-        GitSync.push();
+        this.touchModified(); GitSync.push();
     },
     getLastTimbre(employeeId) {
         return this.getTimbrages()
@@ -162,13 +162,13 @@ const Storage = {
     },
     saveRates(rates) {
         localStorage.setItem('pointage_rates', JSON.stringify(rates));
-        GitSync.push();
+        this.touchModified(); GitSync.push();
     },
     setRate(employeeId, percentage) {
         const rates = this.getRates();
         rates[employeeId] = percentage;
         localStorage.setItem('pointage_rates', JSON.stringify(rates));
-        GitSync.push();
+        this.touchModified(); GitSync.push();
     },
     getRate(employeeId) {
         const rates = this.getRates();
@@ -184,7 +184,7 @@ const Storage = {
     },
     saveHolidays(holidays) {
         localStorage.setItem('pointage_holidays', JSON.stringify(holidays));
-        GitSync.push();
+        this.touchModified(); GitSync.push();
     },
     addHoliday(date, name) {
         const holidays = this.getHolidays();
@@ -192,13 +192,13 @@ const Storage = {
         holidays.push({ date, name, employeeHours: {} });
         holidays.sort((a, b) => a.date.localeCompare(b.date));
         localStorage.setItem('pointage_holidays', JSON.stringify(holidays));
-        GitSync.push();
+        this.touchModified(); GitSync.push();
         return true;
     },
     removeHoliday(date) {
         const holidays = this.getHolidays().filter(h => h.date !== date);
         localStorage.setItem('pointage_holidays', JSON.stringify(holidays));
-        GitSync.push();
+        this.touchModified(); GitSync.push();
     },
     setHolidayHours(date, employeeId, hours) {
         const holidays = this.getHolidays();
@@ -207,7 +207,7 @@ const Storage = {
         if (!h.employeeHours) h.employeeHours = {};
         h.employeeHours[employeeId] = hours;
         localStorage.setItem('pointage_holidays', JSON.stringify(holidays));
-        GitSync.push();
+        this.touchModified(); GitSync.push();
     },
     getHolidayHoursForEmployee(date, employeeId) {
         const h = this.getHolidays().find(x => x.date === date);
@@ -218,6 +218,16 @@ const Storage = {
         return this.getHolidays().some(h => h.date === dateStr);
     },
 
+    // ── Timestamp de dernière modification locale ──
+    getLastModified() {
+        return localStorage.getItem('pointage_lastModified') || '';
+    },
+    touchModified() {
+        const ts = new Date().toISOString();
+        localStorage.setItem('pointage_lastModified', ts);
+        return ts;
+    },
+
     // ── Export / Import ──
     exportAll() {
         return JSON.stringify({
@@ -226,7 +236,7 @@ const Storage = {
             rates: this.getRates(),
             holidays: this.getHolidays(),
             settings: Settings.get(),
-            exportDate: new Date().toISOString()
+            exportDate: this.getLastModified() || new Date().toISOString()
         }, null, 2);
     },
     importAll(jsonString) {
@@ -236,6 +246,8 @@ const Storage = {
         if (data.rates) localStorage.setItem('pointage_rates', JSON.stringify(data.rates));
         if (data.holidays) localStorage.setItem('pointage_holidays', JSON.stringify(data.holidays));
         if (data.settings) localStorage.setItem('pointage_settings', JSON.stringify(data.settings));
+        // Sauver le exportDate du remote comme notre lastModified
+        if (data.exportDate) localStorage.setItem('pointage_lastModified', data.exportDate);
         // Backward compat: migrate old contracts to rates
         if (data.contracts && !data.rates) {
             const rates = {};
