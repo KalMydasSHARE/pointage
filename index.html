@@ -7,12 +7,12 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Pointage</title>
-    <link rel="stylesheet" href="styles.css?v=12">
+    <link rel="stylesheet" href="styles.css?v=13">
     <script>
     // Auto-updater: vérifie si une nouvelle version du HTML existe sur le serveur
     // Si oui, force un rechargement. Empêche les boucles avec sessionStorage.
     (function(){
-        var CURRENT_VERSION = '12';
+        var CURRENT_VERSION = '13';
         var reloadKey = 'pointage_reload_v' + CURRENT_VERSION;
         if (sessionStorage.getItem(reloadKey)) return; // déjà rechargé cette session
         fetch(location.pathname + '?_vc=' + Date.now(), {cache:'no-store'})
@@ -90,7 +90,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=12"></script>
+    <script src="app.js?v=13"></script>
     <script>
         const empSelect = document.getElementById('empSelect');
         const timbrBtn = document.getElementById('timbrBtn');
@@ -202,14 +202,14 @@
             section.style.display = 'block';
             document.getElementById('historyToggle').style.display = 'block';
 
-            // Titre
-            document.getElementById('balanceTitle').textContent = monthNameFr(info.ym) + ' (' + info.pct + '%)';
+            // Titre (mois seulement, sans pourcentage)
+            document.getElementById('balanceTitle').textContent = monthNameFr(info.ym);
 
-            // Barre de progression
-            const fill = document.getElementById('progressBarFill');
-            fill.style.width = info.progressPct + '%';
-            fill.className = 'progress-bar-fill' + (info.progressPct >= 100 ? ' complete' : '');
-            document.getElementById('progressBarLabel').textContent = info.progressPct + '%';
+            // Barre de progression masquée
+            var progressBar = document.getElementById('progressBarFill');
+            if (progressBar && progressBar.parentElement) progressBar.parentElement.style.display = 'none';
+            var progressLabel = document.getElementById('progressBarLabel');
+            if (progressLabel) progressLabel.style.display = 'none';
 
             // Balance actuelle (le chiffre principal que l'employé voit)
             const balDiv = document.getElementById('currentBalance');
