@@ -263,6 +263,7 @@ const GitSync = {
             if (this._sha) body.sha = this._sha;
             const response = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/contents/data.json', {
                 method: 'PUT',
+                cache: 'no-store',
                 headers: { 'Authorization': 'Bearer ' + getGitHubToken(), 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
                 body: JSON.stringify(body)
             });
@@ -284,7 +285,8 @@ const GitSync = {
         if (!this.isConfigured()) return false;
         this._updateIndicator('syncing');
         try {
-            const response = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/contents/data.json', {
+            const response = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/contents/data.json?_=' + Date.now(), {
+                cache: 'no-store',
                 headers: { 'Authorization': 'Bearer ' + getGitHubToken(), 'Accept': 'application/vnd.github.v3+json' }
             });
             if (response.ok) {
@@ -292,12 +294,12 @@ const GitSync = {
                 this._sha = result.sha;
                 const content = decodeURIComponent(escape(atob(result.content)));
                 const data = JSON.parse(content);
-                // Comparer par date d'export: si remote est plus récent, on importe tout
+                // Toujours importer si remote est différent (date ou contenu)
                 const remoteDate = data.exportDate || '';
                 const localDate = JSON.parse(Storage.exportAll()).exportDate || '';
                 const remoteTimbrages = (data.timbrages || []).length;
                 const localTimbrages = Storage.getTimbrages().length;
-                if (remoteDate > localDate || remoteTimbrages > localTimbrages) {
+                if (remoteDate > localDate || remoteTimbrages !== localTimbrages) {
                     Storage.importAll(content);
                     this._updateIndicator('ok');
                     console.log('GitHub pull: données mises à jour (remote:', remoteDate, 'local:', localDate, ')');
