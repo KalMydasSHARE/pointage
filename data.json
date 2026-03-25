@@ -145,7 +145,47 @@
       "date": "2026-01-01",
       "name": "Nouvel An",
       "employeeHours": {}
+    },
+    {
+      "date": "2026-01-02",
+      "name": "Saint-Berchtold",
+      "employeeHours": {}
+    },
+    {
+      "date": "2026-04-03",
+      "name": "Vendredi Saint",
+      "employeeHours": {}
+    },
+    {
+      "date": "2026-04-06",
+      "name": "Lundi de Pâques",
+      "employeeHours": {}
+    },
+    {
+      "date": "2026-05-14",
+      "name": "Ascension",
+      "employeeHours": {}
+    },
+    {
+      "date": "2026-05-25",
+      "name": "Lundi de Pentecôte",
+      "employeeHours": {}
+    },
+    {
+      "date": "2026-08-01",
+      "name": "Fête nationale suisse",
+      "employeeHours": {}
+    },
+    {
+      "date": "2026-12-25",
+      "name": "Noël",
+      "employeeHours": {}
+    },
+    {
+      "date": "2026-12-26",
+      "name": "Saint-Étienne",
+      "employeeHours": {}
     }
   ],
-  "exportDate": "2026-03-25T01:00:36.293Z"
+  "exportDate": "2026-03-25T01:00:37.321Z"
 }
