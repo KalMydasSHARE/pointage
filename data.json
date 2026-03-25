@@ -39,10 +39,11 @@
       "employeeName": "Dylan",
       "type": "SORTIE",
       "date": "2026-03-25",
-      "time": "10:37",
-      "timestamp": "2026-03-25T10:37:00",
-      "source": "system",
-      "remark": ""
+      "time": "03:53",
+      "timestamp": "2026-03-25T03:53:00",
+      "source": "admin_edit",
+      "remark": "Oubli de timbrage (Modifié: heure: 10:37 → 03:53)",
+      "editedAt": "2026-03-25T09:37:40.471Z"
     }
   ],
   "rates": {
@@ -100,5 +101,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-25T09:37:05.416Z"
+  "exportDate": "2026-03-25T09:37:40.471Z"
 }
