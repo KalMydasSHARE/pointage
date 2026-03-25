@@ -1,92 +1,179 @@
 {
   "employees": [
     {
+      "id": "emp_1774308344339_f6c6",
+      "name": "Ethan"
+    },
+    {
+      "id": "emp_1774308350085_4cl7",
+      "name": "Stéphanie"
+    },
+    {
+      "id": "emp_1774308354765_8m70",
+      "name": "Thomas"
+    },
+    {
       "id": "emp_1774308357090_qngz",
       "name": "Rachel"
     },
     {
       "id": "emp_1774386874210_i034",
       "name": "Dylan"
-    },
-    {
-      "id": "emp_1774400602166_6mej",
-      "name": "Stéphanie"
-    },
-    {
-      "id": "emp_1774400606459_68q9",
-      "name": "Thomas"
-    },
-    {
-      "id": "emp_1774400609885_9bcs",
-      "name": "Ethan"
     }
   ],
   "timbrages": [
     {
-      "id": "t_1774400852522_u43w",
+      "id": "t_1774375569754_8s4x",
+      "employeeId": "emp_1774308357090_qngz",
+      "employeeName": "Rachel",
+      "type": "ENTRÉE",
+      "date": "2026-03-23",
+      "time": "21:00",
+      "timestamp": "2026-03-23T21:00:00"
+    },
+    {
+      "id": "t_1774375590019_43kg",
+      "employeeId": "emp_1774308357090_qngz",
+      "employeeName": "Rachel",
+      "type": "ENTRÉE",
+      "date": "2026-03-24",
+      "time": "00:05",
+      "timestamp": "2026-03-24T00:05:00"
+    },
+    {
+      "id": "t_1774375596418_ok3b",
+      "employeeId": "emp_1774308357090_qngz",
+      "employeeName": "Rachel",
+      "type": "SORTIE",
+      "date": "2026-03-24",
+      "time": "02:00",
+      "timestamp": "2026-03-24T02:00:00"
+    },
+    {
+      "id": "t_1774375607848_j9z7",
+      "employeeId": "emp_1774308357090_qngz",
+      "employeeName": "Rachel",
+      "type": "ENTRÉE",
+      "date": "2026-03-24",
+      "time": "19:06",
+      "timestamp": "2026-03-24T19:06:00"
+    },
+    {
+      "id": "t_1774375658770_u9u9",
+      "employeeId": "emp_1774308357090_qngz",
+      "employeeName": "Rachel",
+      "type": "SORTIE",
+      "date": "2026-03-23",
+      "time": "23:59",
+      "timestamp": "2026-03-23T23:59:00"
+    },
+    {
+      "id": "t_1774380693153_k25a",
+      "employeeId": "emp_1774308357090_qngz",
+      "employeeName": "Rachel",
+      "type": "SORTIE",
+      "date": "2026-03-24",
+      "time": "20:31",
+      "timestamp": "2026-03-24T20:31:00"
+    },
+    {
+      "id": "t_1774386991302_12ln",
+      "employeeId": "emp_1774386874210_i034",
+      "employeeName": "Dylan",
+      "type": "ENTRÉE",
+      "date": "2026-03-24",
+      "time": "22:16",
+      "timestamp": "2026-03-24T22:16:00"
+    },
+    {
+      "id": "t_1774392363208_zolk",
+      "employeeId": "emp_1774386874210_i034",
+      "employeeName": "Dylan",
+      "type": "SORTIE",
+      "date": "2026-03-24",
+      "time": "23:46",
+      "timestamp": "2026-03-24T23:46:00"
+    },
+    {
+      "id": "t_1774392380292_dskb",
+      "employeeId": "emp_1774386874210_i034",
+      "employeeName": "Dylan",
+      "type": "ENTRÉE",
+      "date": "2026-03-24",
+      "time": "23:46",
+      "timestamp": "2026-03-24T23:46:00"
+    },
+    {
+      "id": "t_1774392820638_i0nq",
+      "employeeId": "emp_1774308344339_f6c6",
+      "employeeName": "Ethan",
+      "type": "ENTRÉE",
+      "date": "2026-03-24",
+      "time": "23:53",
+      "timestamp": "2026-03-24T23:53:00",
+      "source": "system",
+      "remark": ""
+    },
+    {
+      "id": "t_1774394166806_7fvv",
+      "employeeId": "emp_1774308350085_4cl7",
+      "employeeName": "Stéphanie",
+      "type": "ENTRÉE",
+      "date": "2026-03-25",
+      "time": "00:16",
+      "timestamp": "2026-03-25T00:16:00",
+      "source": "system",
+      "remark": ""
+    },
+    {
+      "id": "t_1774403394917_zask",
       "employeeId": "emp_1774386874210_i034",
       "employeeName": "Dylan",
       "type": "ENTRÉE",
       "date": "2026-03-25",
-      "time": "02:07",
-      "timestamp": "2026-03-25T02:07:00",
+      "time": "02:49",
+      "timestamp": "2026-03-25T02:49:00",
       "source": "system",
       "remark": ""
     }
   ],
   "rates": {
-    "emp_1774308344339_f6c6": 60,
-    "emp_1774308354765_8m70": 60,
-    "emp_1774308357090_qngz": 80,
-    "emp_1774400609885_9bcs": 60,
-    "emp_1774400606459_68q9": 60
+    "emp_1774308344339_f6c6": 60
   },
   "holidays": [
     {
       "date": "2026-01-01",
-      "name": "Nouvel An",
-      "employeeHours": {}
+      "name": "Jour de l'An"
     },
     {
       "date": "2026-01-02",
-      "name": "Saint-Berchtold",
-      "employeeHours": {}
+      "name": "Lendemain du Jour de l'An"
     },
     {
       "date": "2026-04-03",
-      "name": "Vendredi Saint",
-      "employeeHours": {}
+      "name": "Vendredi saint"
     },
     {
       "date": "2026-04-06",
-      "name": "Lundi de Pâques",
-      "employeeHours": {}
-    },
-    {
-      "date": "2026-05-14",
-      "name": "Ascension",
-      "employeeHours": {}
-    },
-    {
-      "date": "2026-05-25",
-      "name": "Lundi de Pentecôte",
-      "employeeHours": {}
+      "name": "Lundi de Pâques"
     },
     {
       "date": "2026-08-01",
-      "name": "Fête nationale suisse",
-      "employeeHours": {}
+      "name": "Fête nationale"
+    },
+    {
+      "date": "2026-09-07",
+      "name": "Fête du Travail"
     },
     {
       "date": "2026-12-25",
-      "name": "Noël",
-      "employeeHours": {}
+      "name": "Noël"
     },
     {
       "date": "2026-12-26",
-      "name": "Saint-Étienne",
-      "employeeHours": {}
+      "name": "Lendemain de Noël"
     }
   ],
-  "exportDate": "2026-03-25T01:07:32.522Z"
+  "settings": {},
+  "exportDate": "2026-03-25T01:51:32.969Z"
 }
