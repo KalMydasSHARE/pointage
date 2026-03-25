@@ -1,10 +1,6 @@
 {
   "employees": [
     {
-      "id": "emp_1774308350085_4cl7",
-      "name": "Stéphanie"
-    },
-    {
       "id": "emp_1774308354765_8m70",
       "name": "Thomas"
     },
@@ -185,5 +181,5 @@
       "employeeHours": {}
     }
   ],
-  "exportDate": "2026-03-25T01:02:53.214Z"
+  "exportDate": "2026-03-25T01:02:55.855Z"
 }
