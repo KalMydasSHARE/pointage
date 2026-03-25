@@ -260,16 +260,26 @@ const Storage = {
 // ============================================
 // GITHUB SYNC
 // ============================================
+const SITE_BASE = 'https://pointage.potspotes.kalmydas.com';
+
 const GitSync = {
     _pushing: false, _pendingPush: false, _sha: null,
-    isConfigured() { return getGitHubToken() !== '' && GITHUB_REPO !== ''; },
+    hasToken() { return getGitHubToken() !== ''; },
+    isConfigured() { return this.hasToken() && GITHUB_REPO !== ''; },
 
     async push() {
-        if (!this.isConfigured()) return;
+        if (!this.isConfigured()) {
+            console.log('Push ignoré — pas de token GitHub');
+            return;
+        }
         if (this._pushing) { this._pendingPush = true; return; }
         this._pushing = true;
         this._updateIndicator('syncing');
         try {
+            // Si pas de SHA, faire un pull API d'abord pour le récupérer
+            if (!this._sha) {
+                await this._pullAPI();
+            }
             const content = btoa(unescape(encodeURIComponent(Storage.exportAll())));
             const body = { message: 'Sync pointage ' + new Date().toLocaleString('fr-CA'), content };
             if (this._sha) body.sha = this._sha;
@@ -285,17 +295,25 @@ const GitSync = {
                 console.log('GitHub sync OK');
             } else {
                 const err = await response.json();
-                if (response.status === 409 || response.status === 422) { await this.pull(); this._pushing = false; return this.push(); }
+                console.log('Push erreur:', response.status, err.message);
+                if (response.status === 409 || response.status === 422) {
+                    await this._pullAPI();
+                    this._pushing = false;
+                    return this.push();
+                }
                 this._updateIndicator('error');
             }
-        } catch (err) { this._updateIndicator('error'); }
+        } catch (err) {
+            console.log('Push exception:', err.message);
+            this._updateIndicator('error');
+        }
         this._pushing = false;
         if (this._pendingPush) { this._pendingPush = false; this.push(); }
     },
 
-    async pull() {
+    // Pull via GitHub API (besoin du token, récupère le SHA pour push)
+    async _pullAPI() {
         if (!this.isConfigured()) return false;
-        this._updateIndicator('syncing');
         try {
             const response = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/contents/data.json?_=' + Date.now(), {
                 cache: 'no-store',
@@ -305,38 +323,84 @@ const GitSync = {
                 const result = await response.json();
                 this._sha = result.sha;
                 const content = decodeURIComponent(escape(atob(result.content)));
-                const data = JSON.parse(content);
-                // Toujours importer si remote est différent (date ou contenu)
-                const remoteDate = data.exportDate || '';
-                const localDate = JSON.parse(Storage.exportAll()).exportDate || '';
-                const remoteTimbrages = (data.timbrages || []).length;
-                const localTimbrages = Storage.getTimbrages().length;
-                if (remoteDate > localDate || remoteTimbrages !== localTimbrages) {
-                    Storage.importAll(content);
-                    this._updateIndicator('ok');
-                    console.log('GitHub pull: données mises à jour (remote:', remoteDate, 'local:', localDate, ')');
-                    return true;
-                }
+                return this._processRemoteData(content);
+            } else if (response.status === 404) { this._sha = null; return false; }
+            return false;
+        } catch (err) { return false; }
+    },
+
+    // Pull via URL publique GitHub Pages (PAS besoin de token, PAS de SHA)
+    async _pullPublic() {
+        try {
+            const response = await fetch(SITE_BASE + '/data.json?_=' + Date.now(), {
+                cache: 'no-store'
+            });
+            if (response.ok) {
+                const content = await response.text();
+                return this._processRemoteData(content);
+            }
+            return false;
+        } catch (err) { return false; }
+    },
+
+    // Traitement commun des données distantes
+    _processRemoteData(content) {
+        try {
+            const data = JSON.parse(content);
+            const remoteDate = data.exportDate || '';
+            const localDate = JSON.parse(Storage.exportAll()).exportDate || '';
+            const remoteTimbrages = (data.timbrages || []).length;
+            const localTimbrages = Storage.getTimbrages().length;
+            if (remoteDate > localDate || remoteTimbrages !== localTimbrages) {
+                Storage.importAll(content);
                 this._updateIndicator('ok');
-                console.log('GitHub pull: données locales à jour');
-                return false;
-            } else if (response.status === 404) { this._sha = null; this._updateIndicator('ok'); return false; }
-            else { this._updateIndicator('error'); return false; }
-        } catch (err) { this._updateIndicator('error'); return false; }
+                console.log('Pull: données mises à jour (remote:', remoteDate, 'local:', localDate, ')');
+                return true;
+            }
+            console.log('Pull: données locales à jour');
+            return false;
+        } catch (err) {
+            console.log('Pull parse error:', err.message);
+            return false;
+        }
+    },
+
+    // Pull principal : API si token dispo, sinon URL publique
+    async pull() {
+        this._updateIndicator('syncing');
+        if (this.isConfigured()) {
+            const result = await this._pullAPI();
+            this._updateIndicator(result !== false ? 'ok' : 'ok');
+            return result;
+        } else {
+            // Pas de token → lecture publique (read-only)
+            console.log('Pull public (pas de token)');
+            const result = await this._pullPublic();
+            this._updateIndicator(result ? 'ok' : 'ok');
+            return result;
+        }
     },
 
     _updateIndicator(status) {
         const el = document.getElementById('syncIndicator');
         if (!el) return;
         if (status === 'syncing') { el.textContent = 'Synchronisation...'; el.className = 'sync-indicator syncing'; }
-        else if (status === 'ok') { el.textContent = 'Sauvegardé'; el.className = 'sync-indicator ok'; setTimeout(() => { el.className = 'sync-indicator hidden'; }, 3000); }
+        else if (status === 'ok') { el.textContent = 'Synchronisé'; el.className = 'sync-indicator ok'; setTimeout(() => { el.className = 'sync-indicator hidden'; }, 3000); }
         else { el.textContent = 'Erreur sync'; el.className = 'sync-indicator error'; }
     },
 
     async init() {
-        if (!this.isConfigured()) return false;
-        console.log('GitHub sync activé — repo:', GITHUB_REPO);
+        if (this.isConfigured()) {
+            console.log('GitHub sync activé (API) — repo:', GITHUB_REPO);
+        } else {
+            console.log('GitHub sync activé (lecture publique — pas de token)');
+        }
         return await this.pull();
+    },
+
+    // Auto-pull toutes les 30 secondes pour garder les données à jour
+    startAutoSync() {
+        setInterval(() => { this.pull(); }, 30000);
     }
 };
 

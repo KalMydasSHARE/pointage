@@ -7,12 +7,12 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Pointage</title>
-    <link rel="stylesheet" href="styles.css?v=10">
+    <link rel="stylesheet" href="styles.css?v=11">
     <script>
     // Auto-updater: vérifie si une nouvelle version du HTML existe sur le serveur
     // Si oui, force un rechargement. Empêche les boucles avec sessionStorage.
     (function(){
-        var CURRENT_VERSION = '10';
+        var CURRENT_VERSION = '11';
         var reloadKey = 'pointage_reload_v' + CURRENT_VERSION;
         if (sessionStorage.getItem(reloadKey)) return; // déjà rechargé cette session
         fetch(location.pathname + '?_vc=' + Date.now(), {cache:'no-store'})
@@ -90,7 +90,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=10"></script>
+    <script src="app.js?v=11"></script>
     <script>
         const empSelect = document.getElementById('empSelect');
         const timbrBtn = document.getElementById('timbrBtn');
@@ -325,6 +325,7 @@
             const updated = await GitSync.init();
             loadEmployees();
             if (updated) loadEmployees();
+            GitSync.startAutoSync();
         }
         init();
     </script>
