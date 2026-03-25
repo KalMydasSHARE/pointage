@@ -44,6 +44,17 @@
       "source": "admin_edit",
       "remark": "Oubli de timbrage (Modifié: heure: 10:37 → 03:53)",
       "editedAt": "2026-03-25T09:37:40.471Z"
+    },
+    {
+      "id": "t_1774431535752_kidv",
+      "employeeId": "emp_1774308357090_qngz",
+      "employeeName": "Rachel",
+      "type": "ENTRÉE",
+      "date": "2026-03-25",
+      "time": "08:00",
+      "timestamp": "2026-03-25T08:00:00",
+      "source": "admin_manual",
+      "remark": "Oubli de timbrage"
     }
   ],
   "rates": {
@@ -101,5 +112,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-25T09:37:40.471Z"
+  "exportDate": "2026-03-25T09:38:55.753Z"
 }
