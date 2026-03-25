@@ -133,6 +133,39 @@ body {
 .prorated-balance.balance-negative { background: rgba(198, 40, 40, 0.1); color: #C62828; }
 .prorated-balance .bal-icon { font-size: 0.8em; margin-right: 4px; }
 
+/* ============================================
+   BALANCE EMPLOYÉ (vue jour par jour)
+   ============================================ */
+.balance-section-emp {
+    margin-top: 25px; background: var(--cream); border-radius: 12px; padding: 20px;
+    border-left: 4px solid var(--caramel-dark);
+}
+.balance-section-emp h3 { color: var(--chocolate); font-size: 1em; margin-bottom: 15px; font-weight: 600; }
+
+.current-balance {
+    text-align: center; padding: 18px 20px; border-radius: 12px; margin-bottom: 10px;
+}
+.current-balance .balance-number {
+    display: block; font-size: 2em; font-weight: 800; letter-spacing: 1px;
+}
+.current-balance .balance-label {
+    display: block; font-size: 0.85em; margin-top: 4px; opacity: 0.8;
+}
+.current-balance.balance-zero { background: var(--cream-dark); color: var(--text-muted); }
+.current-balance.balance-positive-bg { background: rgba(46, 125, 50, 0.1); color: #2E7D32; }
+.current-balance.balance-negative-bg { background: rgba(198, 40, 40, 0.1); color: #C62828; }
+
+.today-summary { margin-top: 12px; font-size: 0.9em; }
+.today-line { padding: 3px 0; color: var(--text); }
+.today-line.muted { color: var(--text-muted); }
+.today-line strong { color: var(--chocolate); }
+
+/* History day detail */
+.history-day-detail {
+    font-size: 0.82em; color: var(--text-muted); margin-bottom: 6px;
+}
+.history-day-detail span { margin-right: 4px; }
+
 /* HISTORIQUE */
 .history-toggle { margin-top: 20px; text-align: center; }
 .btn-link {

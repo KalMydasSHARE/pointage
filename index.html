@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Pointage</title>
-    <link rel="stylesheet" href="styles.css?v=5">
+    <link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
     <div class="page-wrapper">
@@ -47,34 +47,23 @@
                     <div id="todayTotal" class="today-total" style="display:none;"></div>
                 </div>
 
-                <!-- Balance mensuelle SIMPLIFIÉE -->
-                <div id="empMonthProgress" class="month-progress-section" style="display:none;">
-                    <h3 id="monthProgressTitle">Ce mois</h3>
-                    <div class="progress-bar-container">
+                <!-- BALANCE JOUR PAR JOUR (compact, pas de gros négatif) -->
+                <div id="empBalanceSection" class="balance-section-emp" style="display:none;">
+                    <h3 id="balanceTitle">Ma balance</h3>
+                    <!-- Balance actuelle en gros -->
+                    <div id="currentBalance" class="current-balance"></div>
+                    <!-- Barre de progression mensuelle -->
+                    <div class="progress-bar-container" style="margin-top:12px;">
                         <div class="progress-bar-fill" id="progressBarFill"></div>
                         <span class="progress-bar-label" id="progressBarLabel">0%</span>
                     </div>
-                    <div class="month-stats">
-                        <div class="stat-row">
-                            <span>Heures ce mois</span>
-                            <strong id="monthWorked">0h 00min</strong>
-                        </div>
-                        <div class="stat-row">
-                            <span>Objectif mensuel</span>
-                            <span id="monthTarget">0h 00min</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>Il reste</span>
-                            <strong id="monthRemaining">0h 00min</strong>
-                        </div>
-                    </div>
-                    <!-- Balance proratisée (petit nombre, pas effrayant) -->
-                    <div id="proratedBalance" class="prorated-balance"></div>
+                    <!-- Aujourd'hui résumé -->
+                    <div id="todaySummary" class="today-summary"></div>
                 </div>
 
                 <!-- Historique (caché par défaut) -->
                 <div class="history-toggle" id="historyToggle" style="display:none;">
-                    <button class="btn-link" onclick="toggleHistory()">Voir l'historique du mois</button>
+                    <button class="btn-link" onclick="toggleHistory()">Voir le détail jour par jour</button>
                 </div>
                 <div id="historySection" class="history-section" style="display:none;">
                     <div id="historyContent"></div>
@@ -83,7 +72,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=5"></script>
+    <script src="app.js?v=6"></script>
     <script>
         const empSelect = document.getElementById('empSelect');
         const timbrBtn = document.getElementById('timbrBtn');
@@ -119,7 +108,7 @@
                 statusSub.textContent = '';
                 todayTimings.innerHTML = '<div class="empty-state">Choisis ton nom</div>';
                 todayTotal.style.display = 'none';
-                document.getElementById('empMonthProgress').style.display = 'none';
+                document.getElementById('empBalanceSection').style.display = 'none';
                 document.getElementById('historyToggle').style.display = 'none';
                 document.getElementById('historySection').style.display = 'none';
                 return;
@@ -176,12 +165,7 @@
                     todayTimings.appendChild(row);
                 });
 
-                let totalH = 0;
-                for (let i = 0; i < timbrages.length; i += 2) {
-                    if (timbrages[i] && timbrages[i+1] && timbrages[i].type === 'ENTRÉE' && timbrages[i+1].type === 'SORTIE') {
-                        totalH += calculateHours(timbrages[i].time, timbrages[i+1].time, today);
-                    }
-                }
+                const totalH = getWorkedHoursForDay(selectedEmpId, today);
                 if (totalH > 0) {
                     todayTotal.textContent = 'Total aujourd\'hui : ' + formatHours(totalH);
                     todayTotal.style.display = 'block';
@@ -190,18 +174,18 @@
                 }
             }
 
-            try { refreshMonthProgress(); } catch(e) { console.warn('refreshMonthProgress error:', e); }
+            try { refreshBalance(); } catch(e) { console.warn('refreshBalance error:', e); }
         }
 
-        function refreshMonthProgress() {
+        function refreshBalance() {
             if (!selectedEmpId) return;
             const info = getEmployeeMonthInfo(selectedEmpId);
-            const section = document.getElementById('empMonthProgress');
+            const section = document.getElementById('empBalanceSection');
             section.style.display = 'block';
             document.getElementById('historyToggle').style.display = 'block';
 
             // Titre
-            document.getElementById('monthProgressTitle').textContent = monthNameFr(info.ym) + ' (' + info.pct + '%)';
+            document.getElementById('balanceTitle').textContent = monthNameFr(info.ym) + ' (' + info.pct + '%)';
 
             // Barre de progression
             const fill = document.getElementById('progressBarFill');
@@ -209,31 +193,34 @@
             fill.className = 'progress-bar-fill' + (info.progressPct >= 100 ? ' complete' : '');
             document.getElementById('progressBarLabel').textContent = info.progressPct + '%';
 
-            // Stats (heures travaillées + fériées)
-            let workedLabel = formatHours(info.worked);
-            if (info.holidayHours > 0) workedLabel += ' + ' + formatHours(info.holidayHours) + ' fériés';
-            document.getElementById('monthWorked').textContent = workedLabel;
-            document.getElementById('monthTarget').textContent = formatHours(info.monthTarget);
-            document.getElementById('monthRemaining').textContent = formatHours(info.remaining);
+            // Balance actuelle (le chiffre principal que l'employé voit)
+            const balDiv = document.getElementById('currentBalance');
 
-            // Balance proratisée (petit nombre basé sur les jours écoulés)
-            const balDiv = document.getElementById('proratedBalance');
             if (!info.hasTimbrages) {
-                // Aucun timbrage = balance zéro, pas de négatif
-                balDiv.className = 'prorated-balance';
-                balDiv.textContent = 'Aucun timbrage ce mois — balance à zéro';
-            } else if (info.elapsedWorkDays > 0) {
-                const bal = info.proratedBalance;
-                const isPositive = bal >= 0;
-                balDiv.className = 'prorated-balance ' + (isPositive ? 'balance-positive' : 'balance-negative');
-                if (isPositive) {
-                    balDiv.innerHTML = '<span class="bal-icon">&#9650;</span> En avance de ' + formatHours(Math.abs(bal));
-                } else {
-                    balDiv.innerHTML = '<span class="bal-icon">&#9660;</span> ' + formatHours(Math.abs(bal)) + ' à rattraper';
-                }
+                balDiv.className = 'current-balance balance-zero';
+                balDiv.innerHTML = '<span class="balance-number">00:00</span><span class="balance-label">Pas encore de timbrage</span>';
             } else {
-                balDiv.className = 'prorated-balance';
-                balDiv.textContent = 'Début du mois';
+                const bal = info.runningBalance;
+                const isPositive = bal >= 0;
+                balDiv.className = 'current-balance ' + (isPositive ? 'balance-positive-bg' : 'balance-negative-bg');
+                balDiv.innerHTML = '<span class="balance-number">' + formatBalanceCompact(bal) + '</span>' +
+                    '<span class="balance-label">' + (isPositive ? 'en avance' : 'à rattraper') + '</span>';
+            }
+
+            // Résumé aujourd'hui
+            const todayDiv = document.getElementById('todaySummary');
+            if (info.workedToday > 0) {
+                const todayBal = info.workedToday - info.dailyTarget;
+                const todaySign = todayBal >= 0 ? '+' : '';
+                todayDiv.innerHTML =
+                    '<div class="today-line">Aujourd\'hui : <strong>' + formatHours(info.workedToday) + '</strong> / ' + formatHours(info.dailyTarget) + '</div>' +
+                    '<div class="today-line muted">Objectif mensuel : ' + formatHours(info.totalCredit) + ' / ' + formatHours(info.monthTarget) + '</div>';
+                todayDiv.style.display = 'block';
+            } else if (info.hasTimbrages) {
+                todayDiv.innerHTML = '<div class="today-line muted">Objectif mensuel : ' + formatHours(info.totalCredit) + ' / ' + formatHours(info.monthTarget) + '</div>';
+                todayDiv.style.display = 'block';
+            } else {
+                todayDiv.style.display = 'none';
             }
         }
 
@@ -246,44 +233,42 @@
 
         function loadHistory() {
             if (!selectedEmpId) return;
-            const ym = currentMonthStr();
-            const timbrages = Storage.getTimbragesByMonth(ym).filter(t => t.employeeId === selectedEmpId);
+            const info = getEmployeeMonthInfo(selectedEmpId);
             const container = document.getElementById('historyContent');
             container.innerHTML = '';
 
-            if (timbrages.length === 0) {
+            if (!info.hasTimbrages || info.dailyDetails.length === 0) {
                 container.innerHTML = '<div class="empty-state">Aucun timbrage ce mois</div>';
                 return;
             }
 
-            // Grouper par date
-            const byDate = {};
-            timbrages.forEach(t => {
-                if (!byDate[t.date]) byDate[t.date] = [];
-                byDate[t.date].push(t);
-            });
-
-            const dates = Object.keys(byDate).sort().reverse();
-            dates.forEach(date => {
-                const dayTimbrages = byDate[date];
-                let dayHours = 0;
-                let entry = null;
-                dayTimbrages.forEach(t => {
-                    if (t.type === 'ENTRÉE') entry = t;
-                    else if (t.type === 'SORTIE' && entry) { dayHours += calculateHours(entry.time, t.time, date); entry = null; }
-                });
-
+            // Afficher jour par jour (le plus récent en premier)
+            const days = [...info.dailyDetails].reverse();
+            days.forEach(day => {
+                const timbrages = Storage.getTimbragesByEmpAndDate(selectedEmpId, day.date);
                 const dayDiv = document.createElement('div');
                 dayDiv.className = 'history-day';
+
+                const balClass = day.runningBalance >= 0 ? 'balance-positive' : 'balance-negative';
+                const dayBalClass = day.dayBalance >= 0 ? 'balance-positive' : 'balance-negative';
+
                 let html = '<div class="history-day-header">' +
-                    '<span>' + formatDateDisplay(date) + '</span>' +
-                    '<strong>' + (dayHours > 0 ? formatHours(dayHours) : 'En cours') + '</strong></div>';
+                    '<span>' + formatDateDisplay(day.date) + '</span>' +
+                    '<span class="' + dayBalClass + '" style="font-weight:600;">' + formatBalanceCompact(day.dayBalance) + '</span>' +
+                    '<strong class="' + balClass + '">' + formatBalanceCompact(day.runningBalance) + '</strong></div>';
+
+                html += '<div class="history-day-detail">' +
+                    '<span>Travaillé: ' + formatHours(day.worked) + '</span>' +
+                    (day.holidayHours > 0 ? '<span> + ' + formatHours(day.holidayHours) + ' férié</span>' : '') +
+                    '<span> / Objectif: ' + formatHours(day.dayTarget) + '</span></div>';
+
                 html += '<div class="history-day-entries">';
-                dayTimbrages.forEach(t => {
+                timbrages.forEach(t => {
                     const icon = t.type === 'ENTRÉE' ? '&#9654;' : '&#9632;';
-                    html += '<span class="history-entry">' + icon + ' ' + t.time + ' ' + t.type + '</span>';
+                    html += '<span class="history-entry">' + icon + ' ' + t.time + '</span>';
                 });
                 html += '</div>';
+
                 dayDiv.innerHTML = html;
                 container.appendChild(dayDiv);
             });

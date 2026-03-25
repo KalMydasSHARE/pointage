@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Admin - Pointage</title>
-    <link rel="stylesheet" href="styles.css?v=5">
+    <link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
     <!-- LOGIN -->
@@ -58,7 +58,7 @@
     <div class="modal-overlay" id="holidayHoursModal" style="display:none;">
         <div class="modal-box" style="max-width:500px;">
             <h3 id="holidayHoursTitle">Heures par employé</h3>
-            <p style="color:var(--text-muted);font-size:0.9em;margin-bottom:15px;">Définis combien d'heures chaque employé reçoit pour ce jour férié. Laisse à 0 si l'employé ne travaille pas ce jour-là.</p>
+            <p style="color:var(--text-muted);font-size:0.9em;margin-bottom:15px;">Définis combien d'heures chaque employé reçoit pour ce jour férié.</p>
             <input type="hidden" id="holidayHoursDate">
             <div id="holidayHoursList"></div>
             <div style="display:flex;gap:10px;margin-top:15px;justify-content:flex-end;">
@@ -91,7 +91,7 @@
                 <button class="tab-btn" data-tab="balance" onclick="switchTab('balance')">Balance</button>
                 <button class="tab-btn" data-tab="employees" onclick="switchTab('employees')">Employés</button>
                 <button class="tab-btn" data-tab="holidays" onclick="switchTab('holidays')">Fériés</button>
-                <button class="tab-btn" data-tab="backup" onclick="switchTab('backup')">Sauvegarde</button>
+                <button class="tab-btn" data-tab="settings" onclick="switchTab('settings')">Paramètres</button>
             </div>
 
             <!-- TAB: AUJOURD'HUI -->
@@ -238,8 +238,22 @@
                 <div id="holidayStats" style="margin-top:20px;"></div>
             </div>
 
-            <!-- TAB: SAUVEGARDE -->
-            <div id="tab-backup" class="tab-panel">
+            <!-- TAB: PARAMÈTRES -->
+            <div id="tab-settings" class="tab-panel">
+                <!-- Période -->
+                <div class="backup-card" style="margin-bottom:20px;">
+                    <h3>Période mensuelle</h3>
+                    <p>Jour du mois où la nouvelle période commence. Les heures seront calculées depuis ce jour jusqu'au même jour du mois suivant.</p>
+                    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
+                        <label style="font-weight:600;">Début de période :</label>
+                        <input type="number" id="periodStartDay" class="input-field" min="1" max="28" step="1" style="width:80px;text-align:center;">
+                        <span style="color:var(--text-muted);">du mois</span>
+                        <button class="btn btn-success" onclick="savePeriodStartDay()">Enregistrer</button>
+                    </div>
+                    <p id="periodInfo" style="margin-top:10px;font-size:0.85em;color:var(--text-muted);"></p>
+                </div>
+
+                <!-- GitHub Sync -->
                 <div class="backup-section">
                     <div class="backup-card">
                         <h3>Synchronisation GitHub</h3>
@@ -268,7 +282,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=5"></script>
+    <script src="app.js?v=6"></script>
     <script>
         // ============================================
         // LOGIN
@@ -296,7 +310,7 @@
             if (tab === 'balance') loadBalanceData();
             if (tab === 'employees') loadEmployeesTab();
             if (tab === 'holidays') loadHolidaysTab();
-            if (tab === 'backup') loadBackupTab();
+            if (tab === 'settings') loadSettingsTab();
         }
 
         // ============================================
@@ -468,7 +482,6 @@
             const sorted = Object.entries(byEmployee).sort((a, b) => a[1].name.localeCompare(b[1].name));
 
             sorted.forEach(([empId, emp]) => {
-                let totalHours = 0;
                 const dates = Object.keys(emp.days).sort();
 
                 const headerTr = document.createElement('tr');
@@ -476,8 +489,14 @@
                 headerTr.innerHTML = '<td colspan="6">' + emp.name + ' (' + Storage.getRate(empId) + '%)</td>';
                 tbody.appendChild(headerTr);
 
+                // Utiliser getWorkedHoursForDaySmart pour chaque jour (gère cross-minuit)
+                let totalHours = 0;
+
                 dates.forEach(date => {
                     const dayTimbrages = emp.days[date];
+                    const dayWorked = getWorkedHoursForDaySmart(empId, date);
+                    totalHours += dayWorked;
+
                     const pairs = [];
                     let currentEntry = null;
 
@@ -485,7 +504,6 @@
                         if (t.type === 'ENTRÉE') currentEntry = t;
                         else if (t.type === 'SORTIE' && currentEntry) {
                             pairs.push({ entry: currentEntry, exit: t });
-                            totalHours += calculateHours(currentEntry.time, t.time, date);
                             currentEntry = null;
                         }
                     });
@@ -516,13 +534,14 @@
                     });
                 });
 
-                // Holiday hours
+                // Holiday hours + balance
                 const holidayHours = getHolidayHoursForMonth(empId, monthValue);
-
-                // Total + Balance (proratisée)
                 const pct = Storage.getRate(empId);
                 const totalCredit = totalHours + holidayHours;
-                const proratedTarget = getProratedTarget(empId, monthValue);
+
+                // Balance admin: heures restantes sur le mois (vue admin = décompte complet)
+                const monthTarget = getTargetHours(empId, monthValue);
+                const proratedTarget = getProratedTargetFromFirstTimbre(empId, monthValue);
                 const balance = totalCredit - proratedTarget;
                 const balCls = balance >= 0 ? 'balance-positive' : 'balance-negative';
 
@@ -534,7 +553,7 @@
                 totalTr.innerHTML =
                     '<td colspan="4" style="text-align:right;"><strong>' + totalLabel + '</strong></td>' +
                     '<td><strong>' + formatHours(totalCredit) + '</strong></td>' +
-                    '<td><strong class="' + balCls + '">' + formatBalance(balance) + '</strong></td>';
+                    '<td><strong class="' + balCls + '">' + formatBalance(balance) + ' (reste ' + formatHours(Math.max(0, monthTarget - totalCredit)) + ')</strong></td>';
                 tbody.appendChild(totalTr);
 
                 const sepTr = document.createElement('tr');
@@ -629,7 +648,7 @@
         }
 
         // ============================================
-        // TAB: BALANCE ANNUELLE (jour par jour)
+        // TAB: BALANCE ANNUELLE (accumulation mensuelle)
         // ============================================
         function populateBalanceSelects() {
             const yearSel = document.getElementById('balanceYear');
@@ -659,14 +678,13 @@
                 if (yearData.monthDetails.length === 0) {
                     html += '<div class="empty-state">Aucune donnée</div>';
                 } else {
-                    html += '<table class="data-table"><thead><tr><th>Mois</th><th>Jours</th><th>Heures dues</th><th>Travaillées</th><th>Fériés</th><th>Balance</th><th>Cumul</th></tr></thead><tbody>';
+                    html += '<table class="data-table"><thead><tr><th>Mois</th><th>Jours</th><th>Travaillées</th><th>Fériés</th><th>Balance</th><th>Cumul</th></tr></thead><tbody>';
                     yearData.monthDetails.forEach(md => {
                         const bCls = md.balance >= 0 ? 'balance-positive' : 'balance-negative';
                         const cCls = md.cumBalance >= 0 ? 'balance-positive' : 'balance-negative';
                         html += '<tr>' +
                             '<td>' + monthNameFr(md.yearMonth) + '</td>' +
                             '<td>' + md.elapsedDays + '/' + md.totalDays + '</td>' +
-                            '<td>' + formatHours(md.target) + '</td>' +
                             '<td>' + (md.worked > 0 ? formatHours(md.worked) : '-') + '</td>' +
                             '<td>' + (md.holidayHours > 0 ? formatHours(md.holidayHours) : '-') + '</td>' +
                             '<td><strong class="' + bCls + '">' + formatBalance(md.balance) + '</strong></td>' +
@@ -695,7 +713,6 @@
                 tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Aucun jour férié configuré</td></tr>';
             } else {
                 holidays.forEach(h => {
-                    // Count configured hours
                     let hoursInfo = '';
                     if (h.employeeHours && Object.keys(h.employeeHours).length > 0) {
                         const configured = Object.entries(h.employeeHours).filter(([k,v]) => v > 0).length;
@@ -740,7 +757,6 @@
             loadHolidaysTab();
         }
 
-        // ── Modal heures fériées par employé ──
         function openHolidayHoursModal(date) {
             const holiday = Storage.getHolidays().find(h => h.date === date);
             if (!holiday) return;
@@ -802,8 +818,34 @@
         }
 
         // ============================================
-        // SAUVEGARDE
+        // TAB: PARAMÈTRES
         // ============================================
+        function loadSettingsTab() {
+            const token = getGitHubToken();
+            if (token) document.getElementById('githubTokenInput').value = token;
+
+            const periodDay = Settings.getPeriodStartDay();
+            document.getElementById('periodStartDay').value = periodDay;
+            updatePeriodInfo(periodDay);
+        }
+
+        function savePeriodStartDay() {
+            const val = parseInt(document.getElementById('periodStartDay').value);
+            if (isNaN(val) || val < 1 || val > 28) { alert('Jour entre 1 et 28'); return; }
+            Settings.setPeriodStartDay(val);
+            updatePeriodInfo(val);
+            alert('Période mise à jour : la balance recommence le ' + val + ' de chaque mois.');
+        }
+
+        function updatePeriodInfo(day) {
+            const info = document.getElementById('periodInfo');
+            if (day === 1) {
+                info.textContent = 'Actuellement : période standard du 1er au dernier jour du mois.';
+            } else {
+                info.textContent = 'Actuellement : la période va du ' + day + ' au ' + (day - 1) + ' du mois suivant.';
+            }
+        }
+
         function exportBackup() {
             const blob = new Blob([Storage.exportAll()], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -846,11 +888,6 @@
                 else if (r.status === 404) { status.innerHTML = '<span style="color:#43a047;">OK — premier sync créera le fichier</span>'; await GitSync.init(); }
                 else status.innerHTML = '<span style="color:#e53935;">Erreur ' + r.status + '</span>';
             } catch (err) { status.innerHTML = '<span style="color:#e53935;">Erreur réseau</span>'; }
-        }
-
-        function loadBackupTab() {
-            const token = getGitHubToken();
-            if (token) document.getElementById('githubTokenInput').value = token;
         }
 
         // INIT
