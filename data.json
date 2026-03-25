@@ -140,11 +140,6 @@
   "rates": {
     "emp_1774308344339_f6c6": 60
   },
-  "holidays": [
-    {
-      "date": "2026-04-06",
-      "name": "Lundi de Pâques"
-    }
-  ],
-  "exportDate": "2026-03-25T01:00:34.671Z"
+  "holidays": [],
+  "exportDate": "2026-03-25T01:00:35.260Z"
 }
