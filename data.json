@@ -23,17 +23,6 @@
   ],
   "timbrages": [
     {
-      "id": "t_1774394166806_7fvv",
-      "employeeId": "emp_1774308350085_4cl7",
-      "employeeName": "Stéphanie",
-      "type": "ENTRÉE",
-      "date": "2026-03-25",
-      "time": "00:16",
-      "timestamp": "2026-03-25T00:16:00",
-      "source": "system",
-      "remark": ""
-    },
-    {
       "id": "t_1774403394917_zask",
       "employeeId": "emp_1774386874210_i034",
       "employeeName": "Dylan",
@@ -86,5 +75,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-25T02:22:33.408Z"
+  "exportDate": "2026-03-25T02:22:42.430Z"
 }
