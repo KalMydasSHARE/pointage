@@ -23,17 +23,6 @@
   ],
   "timbrages": [
     {
-      "id": "t_1774392820638_i0nq",
-      "employeeId": "emp_1774308344339_f6c6",
-      "employeeName": "Ethan",
-      "type": "ENTRÉE",
-      "date": "2026-03-24",
-      "time": "23:53",
-      "timestamp": "2026-03-24T23:53:00",
-      "source": "system",
-      "remark": ""
-    },
-    {
       "id": "t_1774394166806_7fvv",
       "employeeId": "emp_1774308350085_4cl7",
       "employeeName": "Stéphanie",
@@ -97,5 +86,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-25T02:22:32.308Z"
+  "exportDate": "2026-03-25T02:22:33.408Z"
 }
