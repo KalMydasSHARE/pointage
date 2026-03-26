@@ -154,6 +154,17 @@
       "timestamp": "2026-03-25T23:59:00",
       "source": "admin_manual",
       "remark": "Oubli de timbrage"
+    },
+    {
+      "id": "t_1774517653337_x4v8",
+      "employeeId": "emp_1774386874210_i034",
+      "employeeName": "Dylan",
+      "type": "ENTRÉE",
+      "date": "2026-03-26",
+      "time": "00:00",
+      "timestamp": "2026-03-26T00:00:00",
+      "source": "admin_manual",
+      "remark": "Ajout manuel (admin)"
     }
   ],
   "rates": {
@@ -211,5 +222,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-26T09:33:54.415Z"
+  "exportDate": "2026-03-26T09:34:13.337Z"
 }
