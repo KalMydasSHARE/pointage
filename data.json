@@ -46,17 +46,6 @@
       "editedAt": "2026-03-25T09:37:40.471Z"
     },
     {
-      "id": "t_1774431535752_kidv",
-      "employeeId": "emp_1774308357090_qngz",
-      "employeeName": "Rachel",
-      "type": "ENTRÉE",
-      "date": "2026-03-25",
-      "time": "08:00",
-      "timestamp": "2026-03-25T08:00:00",
-      "source": "admin_manual",
-      "remark": "Oubli de timbrage"
-    },
-    {
       "id": "t_1774436947898_a9h1",
       "employeeId": "emp_1774373909898_pusd",
       "employeeName": "Rachel",
@@ -284,5 +273,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-26T19:16:34.240Z"
+  "exportDate": "2026-03-26T19:17:36.734Z"
 }
