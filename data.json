@@ -46,6 +46,18 @@
       "editedAt": "2026-03-25T09:37:40.471Z"
     },
     {
+      "id": "t_1774436947898_a9h1",
+      "employeeId": "emp_1774373909898_pusd",
+      "employeeName": "Rachel",
+      "type": "SORTIE",
+      "date": "2026-03-25",
+      "time": "12:09",
+      "timestamp": "2026-03-25T12:09:00",
+      "source": "admin_edit",
+      "remark": "oubli (Modifié: )",
+      "editedAt": "2026-03-26T19:16:34.240Z"
+    },
+    {
       "id": "t_1774441684182_4q7f",
       "employeeId": "emp_1774373909898_pusd",
       "employeeName": "Rachel",
@@ -261,5 +273,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-26T19:17:39.122Z"
+  "exportDate": "2026-03-26T19:17:36.734Z"
 }
