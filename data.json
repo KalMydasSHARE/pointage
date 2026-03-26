@@ -184,10 +184,11 @@
       "employeeName": "Rachel",
       "type": "ENTRÉE",
       "date": "2026-03-26",
-      "time": "14:53",
-      "timestamp": "2026-03-26T14:53:00",
-      "source": "system",
-      "remark": ""
+      "time": "13:00",
+      "timestamp": "2026-03-26T13:00:00",
+      "source": "admin_edit",
+      "remark": "Modifié: heure: 14:53 → 13:00",
+      "editedAt": "2026-03-26T13:54:23.330Z"
     }
   ],
   "rates": {
@@ -245,5 +246,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-26T13:53:51.876Z"
+  "exportDate": "2026-03-26T13:54:23.330Z"
 }
