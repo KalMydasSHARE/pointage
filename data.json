@@ -65,8 +65,8 @@
       "time": "12:09",
       "timestamp": "2026-03-25T12:09:00",
       "source": "admin_edit",
-      "remark": "Modifié: type: ENTRÉE → SORTIE",
-      "editedAt": "2026-03-26T19:16:23.987Z"
+      "remark": "oubli (Modifié: )",
+      "editedAt": "2026-03-26T19:16:34.240Z"
     },
     {
       "id": "t_1774441684182_4q7f",
@@ -284,5 +284,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-26T19:16:30.549Z"
+  "exportDate": "2026-03-26T19:16:34.240Z"
 }
