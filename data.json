@@ -60,13 +60,13 @@
       "id": "t_1774436947898_a9h1",
       "employeeId": "emp_1774373909898_pusd",
       "employeeName": "Rachel",
-      "type": "ENTRÉE",
+      "type": "SORTIE",
       "date": "2026-03-25",
       "time": "12:09",
       "timestamp": "2026-03-25T12:09:00",
       "source": "admin_edit",
-      "remark": "Modifié: type: SORTIE → ENTRÉE",
-      "editedAt": "2026-03-26T19:16:02.454Z"
+      "remark": "Modifié: type: ENTRÉE → SORTIE",
+      "editedAt": "2026-03-26T19:16:23.987Z"
     },
     {
       "id": "t_1774441684182_4q7f",
@@ -284,5 +284,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-26T19:16:02.454Z"
+  "exportDate": "2026-03-26T19:16:23.987Z"
 }
