@@ -205,6 +205,17 @@
       "source": "admin_edit",
       "remark": "oubli (Modifié: heure: 20:09 → 19:20)",
       "editedAt": "2026-03-26T19:10:09.998Z"
+    },
+    {
+      "id": "t_1774552687979_oz45",
+      "employeeId": "emp_1774308357090_qngz",
+      "employeeName": "Rachel",
+      "type": "ENTRÉE",
+      "date": "2026-03-25",
+      "time": "08:00",
+      "timestamp": "2026-03-25T08:00:00",
+      "source": "admin_manual",
+      "remark": "oubli"
     }
   ],
   "rates": {
@@ -262,5 +273,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-26T19:17:44.411Z"
+  "exportDate": "2026-03-26T19:18:07.980Z"
 }
