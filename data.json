@@ -79,17 +79,6 @@
       "remark": ""
     },
     {
-      "id": "t_1774451361908_gx5e",
-      "employeeId": "emp_1774386874210_i034",
-      "employeeName": "Dylan",
-      "type": "SORTIE",
-      "date": "2026-03-25",
-      "time": "16:09",
-      "timestamp": "2026-03-25T16:09:00",
-      "source": "system",
-      "remark": ""
-    },
-    {
       "id": "t_1774458209598_dgmq",
       "employeeId": "emp_1774308357090_qngz",
       "employeeName": "Rachel",
@@ -257,5 +246,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-26T14:33:01.354Z"
+  "exportDate": "2026-03-26T14:33:03.830Z"
 }
