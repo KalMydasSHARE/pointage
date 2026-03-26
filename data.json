@@ -190,6 +190,17 @@
       "source": "admin_edit",
       "remark": "Modifié: type: ENTRÉE → SORTIE",
       "editedAt": "2026-03-26T14:34:01.525Z"
+    },
+    {
+      "id": "t_1774535774488_lkic",
+      "employeeId": "emp_1774386874210_i034",
+      "employeeName": "Dylan",
+      "type": "ENTRÉE",
+      "date": "2026-03-26",
+      "time": "15:36",
+      "timestamp": "2026-03-26T15:36:00",
+      "source": "system",
+      "remark": ""
     }
   ],
   "rates": {
@@ -247,5 +258,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-26T14:34:13.923Z"
+  "exportDate": "2026-03-26T14:36:14.488Z"
 }
