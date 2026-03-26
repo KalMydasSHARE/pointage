@@ -177,6 +177,17 @@
       "timestamp": "2026-03-26T12:29:00",
       "source": "system",
       "remark": ""
+    },
+    {
+      "id": "t_1774533231875_p92v",
+      "employeeId": "emp_1774308357090_qngz",
+      "employeeName": "Rachel",
+      "type": "ENTRÉE",
+      "date": "2026-03-26",
+      "time": "14:53",
+      "timestamp": "2026-03-26T14:53:00",
+      "source": "system",
+      "remark": ""
     }
   ],
   "rates": {
@@ -234,5 +245,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-26T11:29:02.368Z"
+  "exportDate": "2026-03-26T13:53:51.876Z"
 }
