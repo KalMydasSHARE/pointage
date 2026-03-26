@@ -166,6 +166,17 @@
       "source": "admin_edit",
       "remark": "Oubli (Modifié: )",
       "editedAt": "2026-03-26T09:34:28.994Z"
+    },
+    {
+      "id": "t_1774524542367_c594",
+      "employeeId": "emp_1774308357090_qngz",
+      "employeeName": "Rachel",
+      "type": "SORTIE",
+      "date": "2026-03-26",
+      "time": "12:29",
+      "timestamp": "2026-03-26T12:29:00",
+      "source": "system",
+      "remark": ""
     }
   ],
   "rates": {
@@ -223,5 +234,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-26T09:34:28.994Z"
+  "exportDate": "2026-03-26T11:29:02.368Z"
 }
