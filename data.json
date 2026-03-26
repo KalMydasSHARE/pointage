@@ -220,10 +220,11 @@
       "employeeName": "Dylan",
       "type": "SORTIE",
       "date": "2026-03-26",
-      "time": "20:09",
-      "timestamp": "2026-03-26T20:09:00",
-      "source": "system",
-      "remark": ""
+      "time": "19:20",
+      "timestamp": "2026-03-26T19:20:00",
+      "source": "admin_edit",
+      "remark": "oubli (Modifié: heure: 20:09 → 19:20)",
+      "editedAt": "2026-03-26T19:10:09.998Z"
     }
   ],
   "rates": {
@@ -281,5 +282,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-26T19:09:55.085Z"
+  "exportDate": "2026-03-26T19:10:09.998Z"
 }
