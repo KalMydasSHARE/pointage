@@ -238,6 +238,17 @@
       "timestamp": "2026-03-25T13:28:00",
       "source": "admin_manual",
       "remark": "oubli"
+    },
+    {
+      "id": "t_1774552723228_u75t",
+      "employeeId": "emp_1774308357090_qngz",
+      "employeeName": "Rachel",
+      "type": "SORTIE",
+      "date": "2026-03-25",
+      "time": "18:03",
+      "timestamp": "2026-03-25T18:03:00",
+      "source": "admin_manual",
+      "remark": "Ajout manuel (admin)"
     }
   ],
   "rates": {
@@ -295,5 +306,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-26T19:18:32.927Z"
+  "exportDate": "2026-03-26T19:18:43.228Z"
 }
