@@ -201,6 +201,17 @@
       "timestamp": "2026-03-26T15:36:00",
       "source": "system",
       "remark": ""
+    },
+    {
+      "id": "t_1774552162706_286c",
+      "employeeId": "emp_1774308357090_qngz",
+      "employeeName": "Rachel",
+      "type": "SORTIE",
+      "date": "2026-03-26",
+      "time": "20:09",
+      "timestamp": "2026-03-26T20:09:00",
+      "source": "system",
+      "remark": ""
     }
   ],
   "rates": {
@@ -258,5 +269,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-26T14:36:14.488Z"
+  "exportDate": "2026-03-26T19:09:22.706Z"
 }
