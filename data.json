@@ -189,6 +189,17 @@
       "timestamp": "2026-03-26T14:30:00",
       "source": "admin_manual",
       "remark": "Oubli"
+    },
+    {
+      "id": "t_1774535636045_7axj",
+      "employeeId": "emp_1774386874210_i034",
+      "employeeName": "Dylan",
+      "type": "ENTRÉE",
+      "date": "2026-03-26",
+      "time": "03:15",
+      "timestamp": "2026-03-26T03:15:00",
+      "source": "admin_manual",
+      "remark": "Oubli"
     }
   ],
   "rates": {
@@ -246,5 +257,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-26T14:33:03.830Z"
+  "exportDate": "2026-03-26T14:33:56.045Z"
 }
