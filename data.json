@@ -194,12 +194,13 @@
       "id": "t_1774535636045_7axj",
       "employeeId": "emp_1774386874210_i034",
       "employeeName": "Dylan",
-      "type": "ENTRÉE",
+      "type": "SORTIE",
       "date": "2026-03-26",
       "time": "03:15",
       "timestamp": "2026-03-26T03:15:00",
-      "source": "admin_manual",
-      "remark": "Oubli"
+      "source": "admin_edit",
+      "remark": "Modifié: type: ENTRÉE → SORTIE",
+      "editedAt": "2026-03-26T14:34:01.525Z"
     }
   ],
   "rates": {
@@ -257,5 +258,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-26T14:33:56.045Z"
+  "exportDate": "2026-03-26T14:34:01.525Z"
 }
