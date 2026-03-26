@@ -58,18 +58,6 @@
       "editedAt": "2026-03-26T19:16:34.240Z"
     },
     {
-      "id": "t_1774441684182_4q7f",
-      "employeeId": "emp_1774373909898_pusd",
-      "employeeName": "Rachel",
-      "type": "ENTRÉE",
-      "date": "2026-03-25",
-      "time": "13:28",
-      "timestamp": "2026-03-25T13:28:00",
-      "source": "admin_edit",
-      "remark": "oubli (Modifié: type: SORTIE → ENTRÉE)",
-      "editedAt": "2026-03-26T19:16:30.549Z"
-    },
-    {
       "id": "t_1774466956081_zg76",
       "employeeId": "emp_1774386874210_i034",
       "employeeName": "Dylan",
@@ -306,5 +294,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-26T19:18:43.228Z"
+  "exportDate": "2026-03-26T19:19:20.031Z"
 }
