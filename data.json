@@ -282,6 +282,17 @@
       "timestamp": "2026-03-27T07:06:00",
       "source": "system",
       "remark": ""
+    },
+    {
+      "id": "t_1774613703800_40jx",
+      "employeeId": "emp_1774386874210_i034",
+      "employeeName": "Dylan",
+      "type": "ENTRÉE",
+      "date": "2026-03-27",
+      "time": "13:15",
+      "timestamp": "2026-03-27T13:15:00",
+      "source": "system",
+      "remark": ""
     }
   ],
   "rates": {
@@ -339,5 +350,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-27T06:06:17.288Z"
+  "exportDate": "2026-03-27T12:15:03.800Z"
 }
