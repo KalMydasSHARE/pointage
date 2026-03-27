@@ -231,11 +231,12 @@
       "employeeId": "emp_1774386874210_i034",
       "employeeName": "Dylan",
       "type": "ENTRÉE",
-      "date": "2026-03-27",
-      "time": "01:31",
-      "timestamp": "2026-03-27T01:31:00",
-      "source": "system",
-      "remark": ""
+      "date": "2026-03-26",
+      "time": "21:30",
+      "timestamp": "2026-03-26T21:30:00",
+      "source": "admin_edit",
+      "remark": "Modifié: heure: 01:31 → 21:30, date: 2026-03-27 → 2026-03-26",
+      "editedAt": "2026-03-27T00:31:25.294Z"
     }
   ],
   "rates": {
@@ -293,5 +294,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-27T00:31:03.214Z"
+  "exportDate": "2026-03-27T00:31:25.294Z"
 }
