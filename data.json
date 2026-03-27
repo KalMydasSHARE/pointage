@@ -326,6 +326,17 @@
       "timestamp": "2026-03-27T22:52:00",
       "source": "system",
       "remark": ""
+    },
+    {
+      "id": "t_1774650410495_nkgd",
+      "employeeId": "emp_1774386874210_i034",
+      "employeeName": "Dylan",
+      "type": "SORTIE",
+      "date": "2026-03-27",
+      "time": "23:26",
+      "timestamp": "2026-03-27T23:26:00",
+      "source": "system",
+      "remark": ""
     }
   ],
   "rates": {
@@ -383,5 +394,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-27T21:52:31.435Z"
+  "exportDate": "2026-03-27T22:26:50.496Z"
 }
