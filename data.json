@@ -225,6 +225,17 @@
       "timestamp": "2026-03-25T18:03:00",
       "source": "admin_manual",
       "remark": "Ajout manuel (admin)"
+    },
+    {
+      "id": "t_1774571463214_rh8a",
+      "employeeId": "emp_1774386874210_i034",
+      "employeeName": "Dylan",
+      "type": "ENTRÉE",
+      "date": "2026-03-27",
+      "time": "01:31",
+      "timestamp": "2026-03-27T01:31:00",
+      "source": "system",
+      "remark": ""
     }
   ],
   "rates": {
@@ -282,5 +293,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-26T19:19:32.380Z"
+  "exportDate": "2026-03-27T00:31:03.214Z"
 }
