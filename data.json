@@ -373,13 +373,13 @@
       "editedAt": "2026-03-28T17:13:51.976Z"
     },
     {
-      "id": "t_1774717875770_fc1e",
+      "id": "t_1774713217608_y7g0",
       "employeeId": "emp_1774308357090_qngz",
       "employeeName": "Rachel",
       "type": "SORTIE",
       "date": "2026-03-28",
-      "time": "18:11",
-      "timestamp": "2026-03-28T18:11:00",
+      "time": "16:53",
+      "timestamp": "2026-03-28T16:53:00",
       "source": "system",
       "remark": ""
     }
@@ -439,5 +439,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-28T17:14:02.891Z"
+  "exportDate": "2026-03-28T17:14:31.322Z"
 }
