@@ -378,10 +378,11 @@
       "employeeName": "Rachel",
       "type": "SORTIE",
       "date": "2026-03-28",
-      "time": "16:53",
-      "timestamp": "2026-03-28T16:53:00",
-      "source": "system",
-      "remark": ""
+      "time": "18:10",
+      "timestamp": "2026-03-28T18:10:00",
+      "source": "admin_edit",
+      "remark": "Modifié: heure: 16:53 → 18:10",
+      "editedAt": "2026-03-28T17:14:51.054Z"
     }
   ],
   "rates": {
@@ -439,5 +440,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-28T17:14:31.322Z"
+  "exportDate": "2026-03-28T17:14:51.060Z"
 }
