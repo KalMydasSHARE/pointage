@@ -348,6 +348,17 @@
       "timestamp": "2026-03-28T12:18:00",
       "source": "system",
       "remark": ""
+    },
+    {
+      "id": "t_1774696713720_28qa",
+      "employeeId": "emp_1774386874210_i034",
+      "employeeName": "Dylan",
+      "type": "SORTIE",
+      "date": "2026-03-28",
+      "time": "12:18",
+      "timestamp": "2026-03-28T12:18:00",
+      "source": "system",
+      "remark": ""
     }
   ],
   "rates": {
@@ -405,5 +416,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-28T11:18:07.398Z"
+  "exportDate": "2026-03-28T11:18:33.720Z"
 }
