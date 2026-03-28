@@ -366,10 +366,11 @@
       "employeeName": "Rachel",
       "type": "ENTRÉE",
       "date": "2026-03-28",
-      "time": "16:53",
-      "timestamp": "2026-03-28T16:53:00",
-      "source": "system",
-      "remark": ""
+      "time": "06:53",
+      "timestamp": "2026-03-28T06:53:00",
+      "source": "admin_edit",
+      "remark": "Modifié: heure: 16:53 → 06:53",
+      "editedAt": "2026-03-28T17:13:51.976Z"
     },
     {
       "id": "t_1774713217608_y7g0",
@@ -449,5 +450,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-28T17:11:15.771Z"
+  "exportDate": "2026-03-28T17:13:51.977Z"
 }
