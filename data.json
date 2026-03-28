@@ -337,6 +337,17 @@
       "timestamp": "2026-03-27T23:26:00",
       "source": "system",
       "remark": ""
+    },
+    {
+      "id": "t_1774696687398_dtsx",
+      "employeeId": "emp_1774386874210_i034",
+      "employeeName": "Dylan",
+      "type": "ENTRÉE",
+      "date": "2026-03-28",
+      "time": "12:18",
+      "timestamp": "2026-03-28T12:18:00",
+      "source": "system",
+      "remark": ""
     }
   ],
   "rates": {
@@ -394,5 +405,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-27T22:26:50.496Z"
+  "exportDate": "2026-03-28T11:18:07.398Z"
 }
