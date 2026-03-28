@@ -373,17 +373,6 @@
       "editedAt": "2026-03-28T17:13:51.976Z"
     },
     {
-      "id": "t_1774713217608_y7g0",
-      "employeeId": "emp_1774308357090_qngz",
-      "employeeName": "Rachel",
-      "type": "SORTIE",
-      "date": "2026-03-28",
-      "time": "16:53",
-      "timestamp": "2026-03-28T16:53:00",
-      "source": "system",
-      "remark": ""
-    },
-    {
       "id": "t_1774717875770_fc1e",
       "employeeId": "emp_1774308357090_qngz",
       "employeeName": "Rachel",
@@ -450,5 +439,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-28T17:13:51.977Z"
+  "exportDate": "2026-03-28T17:14:02.891Z"
 }
