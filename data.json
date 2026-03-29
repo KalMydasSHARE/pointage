@@ -383,6 +383,17 @@
       "source": "admin_edit",
       "remark": "Modifié: heure: 16:53 → 18:10",
       "editedAt": "2026-03-28T17:14:51.054Z"
+    },
+    {
+      "id": "t_1774767089463_siji",
+      "employeeId": "emp_1774308357090_qngz",
+      "employeeName": "Rachel",
+      "type": "ENTRÉE",
+      "date": "2026-03-29",
+      "time": "08:51",
+      "timestamp": "2026-03-29T08:51:00",
+      "source": "system",
+      "remark": ""
     }
   ],
   "rates": {
@@ -440,5 +451,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-03-28T17:14:51.060Z"
+  "exportDate": "2026-03-29T06:51:29.464Z"
 }
