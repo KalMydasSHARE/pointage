@@ -439,6 +439,17 @@
       "timestamp": "2026-03-31T08:10:00",
       "source": "admin_manual",
       "remark": "Ajout manuel (admin)"
+    },
+    {
+      "id": "t_1775021532875_rgsa",
+      "employeeId": "emp_1774308357090_qngz",
+      "employeeName": "Rachel",
+      "type": "SORTIE",
+      "date": "2026-03-31",
+      "time": "19:45",
+      "timestamp": "2026-03-31T19:45:00",
+      "source": "admin_manual",
+      "remark": "Ajout manuel (admin)"
     }
   ],
   "rates": {
@@ -496,5 +507,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-04-01T05:31:51.679Z"
+  "exportDate": "2026-04-01T05:32:12.876Z"
 }
