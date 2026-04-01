@@ -428,6 +428,17 @@
       "timestamp": "2026-03-30T18:30:00",
       "source": "admin_manual",
       "remark": "Ajout manuel (admin)"
+    },
+    {
+      "id": "t_1775021511678_q9fg",
+      "employeeId": "emp_1774308357090_qngz",
+      "employeeName": "Rachel",
+      "type": "ENTRÉE",
+      "date": "2026-03-31",
+      "time": "08:10",
+      "timestamp": "2026-03-31T08:10:00",
+      "source": "admin_manual",
+      "remark": "Ajout manuel (admin)"
     }
   ],
   "rates": {
@@ -485,5 +496,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-04-01T05:31:26.125Z"
+  "exportDate": "2026-04-01T05:31:51.679Z"
 }
