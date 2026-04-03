@@ -450,17 +450,6 @@
       "timestamp": "2026-03-31T19:45:00",
       "source": "admin_manual",
       "remark": "Ajout manuel (admin)"
-    },
-    {
-      "id": "t_1775181283318_jrus",
-      "employeeId": "emp_1774386874210_i034",
-      "employeeName": "Dylan",
-      "type": "SORTIE",
-      "date": "2026-04-03",
-      "time": "03:54",
-      "timestamp": "2026-04-03T03:54:00",
-      "source": "system",
-      "remark": ""
     }
   ],
   "rates": {
@@ -518,5 +507,5 @@
     }
   ],
   "settings": {},
-  "exportDate": "2026-04-03T01:54:43.319Z"
+  "exportDate": "2026-04-03T01:54:58.657Z"
 }
